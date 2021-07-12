@@ -109,7 +109,6 @@ ARG SERVER_NAME=""
 
 WORKDIR /app
 RUN pysu app django-admin collectstatic --noinput -v0 --clear --link
-RUN sphinx-build src/api/docs/ src/api/static/api/docs/_build/html
 
 COPY docker/python/entrypoint.sh /
 COPY docker/python/httpd.conf /etc/app
