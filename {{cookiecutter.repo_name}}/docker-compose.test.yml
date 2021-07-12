@@ -1,22 +1,27 @@
-version: "{{ cookiecutter.docker_compose_version }}"
+version: "3.7"
 
 services:
-
   test:
     build:
       context: .
-      dockerfile: docker/test/Dockerfile
+      dockerfile: docker/python/Dockerfile
+      args:
+        REQUIREMENTS: test
+        DJANGO_SETTINGS_MODULE: {{ cookiecutter.django_project_name }}.settings_test
+    entrypoint: /app/src/tests/entrypoint.sh
+    env_file:
+      - .env-test
     environment:
-      DB_NAME: app
-      DB_USER: app
-      DB_PASSWORD: app
-      DB_HOST: pg
+      DJANGO_DEBUG:
+      DJANGO_DEBUG_SQL:
       PYTHONHUNTER:
       PYTHONHUNTERCONFIG:
+      SERVER_NAME: localhost
+      DJANGO_SECRET_KEY: test123
+      SENTRY_DSN: ""
     stop_signal: SIGINT
     depends_on:
-    - pg
-    - redis
+      - pg
     volumes:
-    - $PWD:/app
-    - $PWD/.home:/home/app
+      - $PWD:/app
+      - $PWD/.home:/home/app

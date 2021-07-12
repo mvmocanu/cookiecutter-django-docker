@@ -1,0 +1,34 @@
+django
+
+# bare minimum stuff
+attrs
+django-crispy-forms
+django-pylibmc
+lazy_object_proxy
+--no-binary=psycopg2
+psycopg2
+pylibmc
+python-dateutil
+requests
+sentry-sdk
+
+# container tooling
+holdup
+pysu
+
+# debug tooling
+aspectlib
+colorama
+django-debug-toolbar
+django-extensions
+django-rosetta
+hunter
+ipdb
+ipython
+jedi
+prompt_toolkit
+remote-pdb
+
+# cron
+yacron
+ruamel.yaml

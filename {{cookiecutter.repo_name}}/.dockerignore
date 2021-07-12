@@ -3,3 +3,7 @@
 **/*.pyc
 **/__pycache__
 static
+*.gz
+*.log
+*.dump
+*.csv

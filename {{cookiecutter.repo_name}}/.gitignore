@@ -21,6 +21,7 @@ test-results/
 
 # local docker-compose settings
 .env
+.env-production
 
 # logs
 *.log

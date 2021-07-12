@@ -1,7 +1,9 @@
 #!/bin/bash -eux
-if [[ "$@" = "--help" || "$@" = "-h" ]]; then
-    set +x
-    echo "
+set -o pipefail
+
+if [[ "$@" == "--help" || "$@" == "-h" ]]; then
+  set +x
+  echo "
 Usage: ./test.sh command-to-run arguments
 
 Examples:
@@ -30,47 +32,48 @@ Examples:
 
     NOCLEAN=1 ./test.sh
 "
-    exit 0
+  exit 0
 fi
 
-DOCKER_CMD="docker-compose -f docker-compose.yml -f docker-compose.test.yml -p {{ cookiecutter.compose_project_name }}test"
+PROJECT_NAME=$(grep COMPOSE_PROJECT_NAME .env | cut -d= -f2 || basename $PWD | sed -r 's/(\w)\w*($|\W+)/\1/g')
+export COMPOSE_PROJECT_NAME="${PROJECT_NAME}test"
+export COMPOSE_FILE=docker-compose.yml:docker-compose.test.yml
 
 USER="${USER:-$(id -nu)}"
 if [[ "$(uname)" == "Darwin" ]]; then
-    USER_UID=1000
-    USER_GID=1000
+  USER_UID=1000
+  USER_GID=1000
 else
-    USER_UID="$(id --user "$USER")"
-    USER_GID="$(id --group "$USER")"
+  USER_UID="$(id --user "$USER")"
+  USER_GID="$(id --group "$USER")"
 fi
 
 if [[ -z "${NOBUILD:-}" ]]; then
-    $DOCKER_CMD build \
-                --build-arg "PROJECT_NAME={{ cookiecutter.compose_project_name }}test" \
-                base
-    $DOCKER_CMD build \
-                --build-arg "LOCAL_USER=$USER" \
-                --build-arg "LOCAL_UID=$USER_UID" \
-                --build-arg "LOCAL_GID=$USER_GID" \
-                test
+  docker-compose build \
+    --build-arg "USER_UID=$USER_UID" \
+    --build-arg "USER_GID=$USER_GID" \
+    test
 fi
-if [[ -z "$@" ]]; then
-    set -- pytest
+if [[ -z "$*" ]]; then
+  set -- pytest
 fi
 
 homedir=$(dirname ${BASH_SOURCE[0]})/.home
 if [[ ! -e $homedir ]]; then
-    # create it here so Docker don't create with root ownership
-    mkdir $homedir
+  # create it here so Docker don't create with root ownership
+  mkdir $homedir
 fi
 
-function cleanup {
-    echo "Cleaning up ..."
-    $DOCKER_CMD down && $DOCKER_CMD rm -fv
+function cleanup() {
+  echo "Cleaning up ..."
+  docker-compose down && docker-compose rm -fv
 }
-if [[ -z "${NOCLEAN:-}" ]]; then
+if [[ -n "${NODEPS:-}" ]]; then
+  exec docker-compose run -e NODEPS=yes --no-deps --rm --user=$USER_UID test "$@"
+else
+  if [[ -z "${NOCLEAN:-}" ]]; then
     trap cleanup EXIT
     cleanup || echo "Already clean :-)"
+  fi
+  docker-compose run --rm --user=$USER_UID test "$@"
 fi
-
-$DOCKER_CMD run --rm --user=$USER test "$@"

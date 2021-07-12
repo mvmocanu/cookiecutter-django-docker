@@ -1,0 +1,16 @@
+-r base.txt
+
+factory_boy
+django-webtest
+coverage
+WebTest
+sqlparse
+
+pytest
+pytest-django
+pytest-clarity
+pytest-cov
+pytest-recording
+pytest-deadfixtures
+pytest-leaks
+time-machine

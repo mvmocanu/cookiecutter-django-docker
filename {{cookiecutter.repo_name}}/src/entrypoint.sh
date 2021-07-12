@@ -14,11 +14,17 @@ elif ! command -v -- "$1" &> /dev/null; then
     exit 1
 fi
 echo -n 'Removing pyc files ... '
-if find . -type f -name "*.py[co]" -delete && find . -type d -name "__pycache__" -delete; then
+if find src -type f -name "*.py[co]" -delete && find src -type d -name "__pycache__" -delete; then
     echo 'Done.'
 else
     echo -e "\033[1;31mFailed to cleanup pyc files. You may have have problems running the code!\033[0m
 
 \033[33mTo fix run this: \033[1;33msudo chown \$USER -R .\033[0m"
 fi
-exec holdup --timeout 10 tcp://pg:5432 -- "$@"
+set -x
+
+if [[ -n "${NODEPS:-}" ]]; then
+  exec "$@"
+else
+  exec holdup --timeout 10 tcp://pg:5432 --verbose -- "$@"
+fi

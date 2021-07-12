@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  pg:
+    ports:
+      - "5432:5432"
+  web:
+    environment:
+      DJANGO_DB_MIGRATE: "yes"
+    ports:
+      - "80:80"
+      - "443:443"
+    entrypoint: ""
+    init: yes
+    command: [ "httpd", "-e", "debug" ]
+    # WINCH - apache graceful restart
+    stop_signal: WINCH

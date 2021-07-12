@@ -1,0 +1,11 @@
+[run]
+data_file = /home/app/.coverage
+branch = true
+source = src
+
+[report]
+show_missing = true
+precision = 2
+
+[html]
+show_contexts = True

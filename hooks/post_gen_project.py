@@ -1,7 +1,29 @@
-from __future__ import print_function
-
+import datetime
+import os
 import random
+import shutil
+import subprocess
+import sys
 from os.path import join
+
+try:
+    from click.termui import secho
+except ImportError:
+    warn = note = print
+else:
+    def warn(text):
+        for line in text.splitlines():
+            secho(line, fg="white", bg="red", bold=True)
+
+
+    def note(text):
+        for line in text.splitlines():
+            secho(line, fg="yellow", bold=True)
+
+
+def unlink_if_exists(path):
+    if os.path.exists(path):
+        os.unlink(path)
 
 
 def replace_content(filename, what, replacement):
@@ -21,21 +43,22 @@ if __name__ == "__main__":
 ################################################################################
 
     You've used these cookiecutter parameters:
-    
-{% for key, value in cookiecutter.items()|sort %}{% if key != '_template' %}
+{% for key, value in cookiecutter.items()|sort %}
         {{ "{0:26}".format(key + ":") }} {{ "{0!r}".format(value).strip("u") }}
-{%- endif %}{%- endfor %}
+{%- endfor %}
+
+    See .cookiecutterrc for instructions on regenerating the project.
 
 ################################################################################
 
-    To get started.  Make a copy of the appropriate platform .env file.
+    To get started make a copy of the appropriate platform .env file:
 
         cd {{ cookiecutter.repo_name }}
         cp .env-linux-osx .env
           or
         cp .env-windows .env
 
-    Then run these
+    Then run these:
 
         docker-compose build --pull base
         docker-compose build
@@ -47,3 +70,14 @@ if __name__ == "__main__":
     )
     replace_content('.env-linux-osx', '<SECRET_KEY>', secret_key)
     replace_content('.env-windows', '<SECRET_KEY>', secret_key)
+    note('+ pip-compile --upgrade requirements/base.in')
+    subprocess.check_call(['pip-compile', '--upgrade', 'requirements/base.in'])
+    note('+ pip-compile --upgrade requirements/test.in')
+    subprocess.check_call(['pip-compile', '--upgrade', 'requirements/test.in'])
+    if not os.path.exists('.git'):
+        warn('+ git init')
+        subprocess.check_call(['git', 'init'])
+    note('+ pre-commit autoupdate')
+    subprocess.check_call(['pre-commit', 'autoupdate'])
+    note('+ pre-commit install --install-hooks')
+    subprocess.check_call(['pre-commit', 'install', '--install-hooks'])
