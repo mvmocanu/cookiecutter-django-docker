@@ -258,5 +258,3 @@ if DEBUG_TOOLBAR:
     DEBUG_TOOLBAR_CONFIG = {
         'SHOW_TOOLBAR_CALLBACK': lambda _: DEBUG
     }
-
-

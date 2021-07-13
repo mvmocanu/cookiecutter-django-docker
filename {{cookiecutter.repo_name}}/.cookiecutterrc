@@ -15,6 +15,6 @@
 #    cookiecutter --overwrite-if-exists --config-file={{cookiecutter.repo_name}}/.cookiecutterrc gh:ionelmc/cookiecutter-django-docker
 
 default_context:
-{% for key, value in cookiecutter.items()|sort %}
-    {{ "{0:26}".format(key + ":") }} {{ "{0!r}".format(value).strip("u") }}
-{%- endfor %}
+{% for key, value in cookiecutter.items()|sort %}{% if key != '_template' %}
+    {{ key }}: {{ "{0!r}".format(value).strip("u") }}
+{%- endif %}{% endfor %}

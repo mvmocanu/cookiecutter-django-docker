@@ -1,14 +1,17 @@
-====================
-evozon/django-docker
-====================
+==========================
+cookiecutter-django-docker
+==========================
 
-A Cookiecutter_ template for a Django_ project using Docker_. A description of the rationale behind this template is in
-`this blog post <https://www.evozon.com/blog/a-project-template-for-getting-started-with-django-and-docker>`_.
+A Cookiecutter_ template for a Django_ project using Docker_.
+Continuation of `evozon/django-docker <https://github.com/evozon/django-docker>`_.
 
 What is included?
 
 * Packages for Django_ project and an app
-* Setup for Celery_, uWSGI_, debug-toolbar etc
+* Setup for Celery_, Apache_, debug-toolbar etc
+* SSL setup for Apache (that's why it's used instead of uWSGI_).
+* Deployment Ansible_ playbooks [TODO]
+* Dockerized LetsEncrypt setup [TODO]
 * Setup for testing using Pytest_.
 * Reloader (container that restarts other containers when files change, for development).
 
@@ -17,7 +20,7 @@ Generating the project
 
 `Install cookiecutter <https://cookiecutter.readthedocs.io/en/latest/installation.html#install-cookiecutter>`_ and run::
 
-    cookiecutter gh:evozon/django-docker
+    cookiecutter gh:ionelmc/cookiecutter-django-docker
 
 You will be asked for these fields:
 
@@ -72,19 +75,21 @@ If you made some wrong choices during generation you can regenerate it. There ar
 
 * Force Cookiecutter_ to override the files::
 
-    cookiecutter --overwrite-if-exists --config-file=directory-of-project/.cookiecutterrc gh:evozon/django-docker
+    cookiecutter --overwrite-if-exists --config-file=directory-of-project/.cookiecutterrc gh:ionelmc/cookiecutter-django-docker
 
 * After installing `cookiepatcher <https://pypi.org/project/cookiepatcher/>`_ run::
 
-    cookiepatcher gh:evozon/django-docker directory-of-project
+    cookiepatcher gh:ionelmc/cookiecutter-django-docker directory-of-project
 
 Using the project
 -----------------
 
-There will be a base image, so for an accurate image building process do this::
+To build the project::
 
-    docker-compose build --pull base
-    docker-compose build
+    docker-compose build --pull
+
+This template previously had a base image but it's just too much of a hassle and
+layer caching work well enough to have individual images.
 
 To start the project run::
 
@@ -102,3 +107,5 @@ Working with the project is the usual ``docker-compose up`` and such, nothing sp
 .. _Django: https://www.djangoproject.com/
 .. _Celery: http://www.celeryproject.org/
 .. _uWSGI: https://uwsgi-docs.readthedocs.io/
+.. _Apache: https://httpd.apache.org/
+.. _Ansible: https://docs.ansible.com/ansible/latest/

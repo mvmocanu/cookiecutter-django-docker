@@ -23,20 +23,11 @@ Running the application
 
 For one-off commands::
 
-    docker-compose run --rm --user=$UID base yourcommand
+    docker-compose run --rm web pysu app yourcommand
 
 .. warning::
 
     When running python commands, don't forget to use ``python3`` instead of ``python``!
-
-Because ``docker-compose run`` does not rebuild your images it's wise to run this every so often::
-
-    # Build the `base` first to make sure we get the changes to `requirements.txt` installed
-    # (``--pull`` to make sure `base` builds from the latest Ubuntu or whatever it inherits)
-    docker-compose build --pull base
-
-    # Build the remaining container images (no ``--pull`` cause `base` can't be pulled)
-    docker-compose build
 
 To start the project::
 
@@ -66,18 +57,15 @@ Don't forget to run migrations!
 
 You may either run it as an one-off::
 
-    docker-compose run --rm web django-admin migrate
+    docker-compose run --rm web pysu app django-admin migrate
 
 Or exec a command inside the web container (if it already runs)::
 
-    docker-compose exec --user=$UID web django-admin migrate
+    docker-compose exec web pysu app django-admin migrate
 
 .. warning::
 
-    Note that if you don't use ``--user=$UID`` you'll get root-owned files all over the place.
-
-    If your shell doesn't provide an ``UID`` variable then use ``--user=$(id --user "$USER")`` instead.
-
+    Note that if you don't include the ``pysu app`` part you might get root-owned files all over the place.
 
 Creating migrations
 ```````````````````
@@ -92,8 +80,6 @@ Reseting the database
 
 If migrations have been recreated run this to drop all your tables and data, and recreate everything from scratch::
 
-    # make sure you don't run stale images
-    docker-compose build --pull base
     docker-compose build
     # make sure pg is up (other services not needed)
     docker-compose up -d pg
@@ -103,8 +89,8 @@ If migrations have been recreated run this to drop all your tables and data, and
     docker-compose exec pg dropdb --username=app app
     docker-compose exec pg createdb --username=app app
     # get the database back in an usable state
-    docker-compose run web django-admin migrate
-    docker-compose run web django-admin createsuperuser
+    docker-compose run --rm web pysu app django-admin migrate
+    docker-compose run --rm web pysu app django-admin createsuperuser
 
 Windows specifics
 -----------------
@@ -118,6 +104,4 @@ Docker supports Windows 10 natively, with some caveats of course. Don't forget t
   * Make sure you use your correct Windows username (Docker might not fill in the correct default).
 
 Under the hood docker will run a HyperV vm and use Windows Sharing (smbmount probably) thus it will be slow, symlinks won't
-work and the permission system is a bit loose.
-
-
+work and the permission system is a bit loose. Good luck!

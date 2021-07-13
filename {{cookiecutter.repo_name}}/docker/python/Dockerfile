@@ -116,6 +116,3 @@ COPY docker/python/entrypoint.sh /
 COPY docker/python/httpd.conf /etc/app
 COPY docker/python/yacron.yml /etc/app
 RUN cp -r /etc/app /etc/app-defaults
-
-COPY docker/python/httpd.sh /usr/local/bin/httpd
-COPY docker/python/cron.sh /usr/local/bin/cron
