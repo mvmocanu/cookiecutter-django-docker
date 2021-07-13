@@ -62,19 +62,21 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = '{{ cookiecutter.django_project_name }}.urls'
 
-TEMPLATES = [{
-    'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'DIRS': os.path.join(BASE_DIR, '{{ cookiecutter.django_project_name }}', 'templates'),
-    'APP_DIRS': True,
-    'OPTIONS': {
-        'context_processors': [
-            'django.template.context_processors.debug',
-            'django.template.context_processors.request',
-            'django.contrib.auth.context_processors.auth',
-            'django.contrib.messages.context_processors.messages',
-        ],
-    },
-}]
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': os.path.join(BASE_DIR, '{{ cookiecutter.django_project_name }}', 'templates'),
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    }
+]
 
 WSGI_APPLICATION = '{{ cookiecutter.django_project_name }}.wsgi.application'
 
@@ -94,15 +96,20 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/stable/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [{
-    'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-}, {
-    'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-}, {
-    'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-}, {
-    'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-}]
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    }
+]
 
 
 # Internationalization
@@ -124,7 +131,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = '/var/app/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, '{{ cookiecutter.django_project_name }}', 'static')
+    os.path.join(BASE_DIR, '{{ cookiecutter.django_project_name }}', 'static'),
 ]
 
 MEDIA_ROOT = '/var/app/media/'
@@ -139,6 +146,42 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
 CELERY_BROKER_TRANSPORT_OPTIONS = {'max_retries': 1}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[%(asctime)s.%(msecs)d] %(name)s (%(levelname)s) %(message)s',
+            'datefmt': '%d/%b/%Y %H:%M:%S',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['console'],
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'django.db.backends': {
+            'level': 'INFO',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+    },
+    'filters': {
+    }
+}
 
 
 # Advanced debug settings
@@ -158,7 +201,7 @@ if SENTRY_DSN:
             DjangoIntegration(),
             LoggingIntegration(
                 level=logging.INFO,
-                event_level=logging.ERROR
+                event_level=logging.ERROR,
             )
         ],
         send_default_pii=True,
@@ -185,28 +228,18 @@ if DEBUG_SQL:
             if not hasattr(record, 'stack_patched'):
                 frame = sys._getframe(1)
                 if self.skip:
-                    while [skip for skip in self.skip
-                           if frame.f_globals.get('__name__', '').startswith(skip)]:
+                    while [skip for skip in self.skip if frame.f_globals.get('__name__', '').startswith(skip)]:
                         frame = frame.f_back
-                if (
-                    hasattr(record, 'duration') and
-                    hasattr(record, 'sql') and
-                    hasattr(record, 'params')
-                ):
+                if hasattr(record, 'duration') and hasattr(record, 'sql') and hasattr(record, 'params'):
                     record.msg = (
-                        "\33[31mduration: %s%.4f secs\33[0m, "
-                        "\33[33marguments: \33[1m%s%s\33[0m\n  %s\n "
-                        "\33[1;32m-- stack: \n%s\33[0m" % (
-                            "\33[31m" if record.duration < 0.1 else "\33[1;31m",
-                            record.duration,
-                            "\33[1;33m" if record.params else '',
-                            record.params,
-                            '\n  '.join('\33[33m%s\33[0m' % line for line in sqlformat(
-                                record.sql or '',
-                                reindent=True
-                            ).strip().splitlines()),
-                            ''.join('\33[1;30m%s\33[0m' % line for line in format_stack(f=frame, limit=self.limit))
-                        )
+                        '\33[31mduration: %s%.4f secs\33[0m, \33[33marguments: \33[1m%s%s\33[0m\n  %s\n \33[1;32m-- stack: \n%s\33[0m'
+                    ) % (
+                        "\33[31m" if record.duration < 0.1 else "\33[1;31m",
+                        record.duration,
+                        "\33[1;33m" if record.params else '',
+                        record.params,
+                        '\n  '.join('\33[33m%s\33[0m' % line for line in sqlformat(record.sql or '', reindent=True).strip().splitlines()),
+                        ''.join('\33[1;30m%s\33[0m' % line for line in format_stack(f=frame, limit=self.limit)),
                     )
                     record.args = ()
                 else:
@@ -233,14 +266,14 @@ if LOGGING_PATH:
             'class': 'logging.handlers.WatchedFileHandler',
             'encoding': 'utf-8',
             'filename': f'{LOGGING_PATH}/application.log',
-            'formatter': 'verbose'
+            'formatter': 'verbose',
         },
         'debugfile': {
             'level': 'DEBUG',
             'class': 'logging.handlers.WatchedFileHandler',
             'encoding': 'utf-8',
             'filename': f'{LOGGING_PATH}/debug.log',
-            'formatter': 'verbose'
+            'formatter': 'verbose',
         },
     })
     LOGGING['root']['handlers'] = ['logfile', 'debugfile']
@@ -256,5 +289,5 @@ if DEBUG_TOOLBAR:
     INSTALLED_APPS += 'debug_toolbar',
     MIDDLEWARE = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE
     DEBUG_TOOLBAR_CONFIG = {
-        'SHOW_TOOLBAR_CALLBACK': lambda _: DEBUG
+        'SHOW_TOOLBAR_CALLBACK': lambda _: DEBUG,
     }
