@@ -12,6 +12,6 @@ services:
       - "443:443"
     entrypoint: ""
     init: yes
-    command: [ "httpd", "-e", "debug" ]
+    command: [ "apache2", "-f", "/etc/app/httpd.conf", "-DFOREGROUND", "-e", "debug" ]
     # WINCH - apache graceful restart
     stop_signal: WINCH

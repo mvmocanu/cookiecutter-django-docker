@@ -49,6 +49,36 @@ if __name__ == "__main__":
 
     See .cookiecutterrc for instructions on regenerating the project.
 
+""")
+    secret_key = ''.join(
+        random.SystemRandom().choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)')
+        for i in range(50)
+    )
+    replace_content('.env-linux-osx', '<SECRET_KEY>', secret_key)
+    replace_content('.env-windows', '<SECRET_KEY>', secret_key)
+    if os.name == 'nt':
+        replace_content('.env-windows', '<CHECKOUT_PATH>', os.getcwd())
+    else:
+        replace_content('.env-windows', '<CHECKOUT_PATH>', r'd:\projects\{{ cookiecutter.repo_name }}')
+    if not os.path.exists('requirements/base.txt'):
+        note('+ pip-compile --upgrade requirements/base.in')
+        subprocess.check_call(['pip-compile', '--upgrade', 'requirements/base.in'])
+    if not os.path.exists('requirements/test.txt'):
+        note('+ pip-compile --upgrade requirements/test.in')
+        subprocess.check_call(['pip-compile', '--upgrade', 'requirements/test.in'])
+    if not os.path.exists('.git'):
+        warn('+ git init')
+        subprocess.check_call(['git', 'init'])
+    note('+ pre-commit autoupdate')
+    subprocess.check_call(['pre-commit', 'autoupdate'])
+    note('+ pre-commit install --install-hooks')
+    subprocess.check_call(['pre-commit', 'install', '--install-hooks'])
+    if os.path.exists('.env'):
+        note('+ docker-compose build')
+        subprocess.check_call(['docker-compose', 'build'])
+    else:
+        warn("You don't have an .env file yet. Skipping docker-compose build")
+    print("""
 ################################################################################
 
     To get started make a copy of the appropriate platform .env file:
@@ -58,26 +88,11 @@ if __name__ == "__main__":
           or
         cp .env-windows .env
 
-    Then run these:
+    To build the project:
 
-        docker-compose build --pull base
-        docker-compose build
+        docker-compose build --pull
+
+    You can bring up the project with:
+
         docker-compose up
-""")
-    secret_key = ''.join(
-        random.SystemRandom().choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)')
-        for i in range(50)
-    )
-    replace_content('.env-linux-osx', '<SECRET_KEY>', secret_key)
-    replace_content('.env-windows', '<SECRET_KEY>', secret_key)
-    note('+ pip-compile --upgrade requirements/base.in')
-    subprocess.check_call(['pip-compile', '--upgrade', 'requirements/base.in'])
-    note('+ pip-compile --upgrade requirements/test.in')
-    subprocess.check_call(['pip-compile', '--upgrade', 'requirements/test.in'])
-    if not os.path.exists('.git'):
-        warn('+ git init')
-        subprocess.check_call(['git', 'init'])
-    note('+ pre-commit autoupdate')
-    subprocess.check_call(['pre-commit', 'autoupdate'])
-    note('+ pre-commit install --install-hooks')
-    subprocess.check_call(['pre-commit', 'install', '--install-hooks'])
+    """)

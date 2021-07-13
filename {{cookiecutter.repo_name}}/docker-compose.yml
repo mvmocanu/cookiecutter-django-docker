@@ -55,7 +55,7 @@ services:
     depends_on:
       - pg
     entrypoint: [ "/entrypoint.sh" ]
-    command: [ "cron" ]
+    command: [ "pysu", "app", "yacron", "--config=/etc/app/yacron.yml" ]
 
   web:
     <<: *python
@@ -68,7 +68,7 @@ services:
   celery:
     <<: *python
     entrypoint: [ "/entrypoint.sh" ]
-    command: ["celery", "-A", "{{ cookiecutter.django_project_name }}", "worker"]
+    command: [ "pysu", "app", "celery", "-A", "{{ cookiecutter.django_project_name }}", "worker" ]
     depends_on:
     - pg
     - redis

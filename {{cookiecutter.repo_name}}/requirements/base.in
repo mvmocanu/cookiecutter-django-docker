@@ -16,19 +16,30 @@ sentry-sdk
 holdup
 pysu
 
-# debug tooling
-aspectlib
-colorama
+# django specific debug tooling
 django-debug-toolbar
 django-extensions
 django-rosetta
+
+# for sql logging
+sqlparse
+colorama
+
+# generic debugging
+remote-pdb
+aspectlib
 hunter
+
+# ipdb
 ipdb
 ipython
 jedi
 prompt_toolkit
-remote-pdb
 
 # cron
 yacron
 ruamel.yaml
+
+# celery
+celery[redis]
+django-celery-results

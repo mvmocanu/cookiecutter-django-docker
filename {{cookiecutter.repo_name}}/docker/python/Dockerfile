@@ -104,8 +104,10 @@ ENV PYTHONFAULTHANDLER=x
 ARG DJANGO_SETTINGS_MODULE
 ENV DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
 
+# Fillins for settings that aren't optional but are needed for collectstatic
+# ARG is used to avoid persisting these variables
 ARG DJANGO_SECRET_KEY="n/a"
-ARG SERVER_NAME=""
+ARG SERVER_NAME="docker"
 
 WORKDIR /app
 RUN pysu app django-admin collectstatic --noinput -v0 --clear --link
