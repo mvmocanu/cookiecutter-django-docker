@@ -23,6 +23,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 ]
 
+if settings.DEBUG:
+    urlpatterns += [
+        path(r'rosetta/', include('rosetta.urls')),
+    ]
+
 if settings.DEBUG_TOOLBAR:
     import debug_toolbar
 

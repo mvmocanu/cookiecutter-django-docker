@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/stable/ref/settings/
 import os
 from pathlib import Path
 
+from django.utils.translation import gettext_lazy as _
+
 
 PROJECT_VERSION = '0.1.0'
 
@@ -58,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 ]
 
 ROOT_URLCONF = '{{ cookiecutter.django_project_name }}.urls'
@@ -120,6 +123,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
+LANGUAGES = [
+    ('en', _('English')),
+]
+
+LOCALE_PATHS = [
+    '/app/src/locale',
+]
+
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
@@ -178,6 +189,11 @@ LOGGING = {
         },
         'django.db.backends': {
             'level': 'INFO',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'asyncio': {
+            'level': 'WARNING',
             'handlers': ['console'],
             'propagate': False,
         },
@@ -290,7 +306,7 @@ if DEBUG:
 
 if DEBUG_TOOLBAR:
     INSTALLED_APPS += 'debug_toolbar',
-    MIDDLEWARE = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE
+    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
     DEBUG_TOOLBAR_CONFIG = {
         'SHOW_TOOLBAR_CALLBACK': lambda _: DEBUG,
     }
