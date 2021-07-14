@@ -65,9 +65,12 @@ ROOT_URLCONF = '{{ cookiecutter.django_project_name }}.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': os.path.join(BASE_DIR, '{{ cookiecutter.django_project_name }}', 'templates'),
+        'DIRS': [
+            os.path.join(BASE_DIR, '{{ cookiecutter.django_project_name }}', 'templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
+            'debug': DEBUG,
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
