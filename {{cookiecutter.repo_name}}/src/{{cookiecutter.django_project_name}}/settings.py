@@ -197,6 +197,11 @@ LOGGING = {
             'handlers': ['console'],
             'propagate': False,
         },
+        'parso': {
+            'level': 'WARNING',
+            'handlers': ['console'],
+            'propagate': False,
+        },
     },
     'filters': {
     }
