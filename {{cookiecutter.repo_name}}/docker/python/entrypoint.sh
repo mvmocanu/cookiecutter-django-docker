@@ -10,7 +10,6 @@ for path in /etc/app-defaults/*; do
   fi
 done
 if [[ -n "${DJANGO_COLLECTSTATIC:-}" ]]; then
-  pysu app sphinx-build src/api/docs/ src/api/static/api/docs/_build/html
   pysu app django-admin collectstatic --noinput --clear -v0
 fi
 holdup --verbose pg://$DJANGO_DB_USER:$DJANGO_DB_PASSWORD@$DJANGO_DB_HOST:5432/$DJANGO_DB_NAME

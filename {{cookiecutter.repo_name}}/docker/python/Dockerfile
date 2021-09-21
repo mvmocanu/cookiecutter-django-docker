@@ -113,8 +113,7 @@ WORKDIR /app
 ARG DJANGO_COLLECTSTATIC
 RUN set -x \
  && if [ -n "$DJANGO_COLLECTSTATIC" ] \
-  ; then sphinx-build src/api/docs/ src/api/static/api/docs/_build/html \
- && django-admin collectstatic --noinput --clear -v0 \
+  ; then django-admin collectstatic --noinput --clear -v0 \
   ; fi
 
 COPY docker/python/entrypoint.sh /
