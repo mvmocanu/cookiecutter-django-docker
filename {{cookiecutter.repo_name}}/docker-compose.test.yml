@@ -14,6 +14,7 @@ services:
     environment:
       DJANGO_DEBUG:
       DJANGO_DEBUG_SQL:
+      DJANGO_DEBUG_SQL_LIMIT:
       PYTHONHUNTER:
       PYTHONHUNTERCONFIG:
       SERVER_NAME: localhost

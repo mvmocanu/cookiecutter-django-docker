@@ -16,6 +16,7 @@ services:
       PYTHONHUNTERCONFIG:
       DJANGO_DEBUG:
       DJANGO_DEBUG_SQL:
+      DJANGO_DEBUG_SQL_LIMIT:
       DJANGO_DEBUG_TOOLBAR:
     env_file:
       - .env

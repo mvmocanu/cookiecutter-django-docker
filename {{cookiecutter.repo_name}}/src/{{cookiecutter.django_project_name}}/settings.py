@@ -29,6 +29,7 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', '').lower() in ['yes', 'true', 'y', '1']
 DEBUG_SQL = os.environ.get('DJANGO_DEBUG_SQL', '').lower() in ['yes', 'true', 'y', '1']
+DEBUG_SQL_LIMIT = int(os.environ.get('DJANGO_DEBUG_SQL_LIMIT', 5) or 5)
 DEBUG_TOOLBAR = os.environ.get('DJANGO_DEBUG_TOOLBAR', '').lower() in ['yes', 'true', 'y', '1']
 LOGGING_PATH = os.environ.get('LOGGING_PATH')
 
@@ -250,25 +251,19 @@ if DEBUG_SQL:
         def filter(self, record):
             if not hasattr(record, 'stack_patched'):
                 frame = sys._getframe(1)
-                if self.skip:
-                    while [skip for skip in self.skip if frame.f_globals.get('__name__', '').startswith(skip)]:
-                        frame = frame.f_back
+                while any(skip for skip in self.skip if frame.f_globals.get('__name__', '').startswith(skip)):
+                    frame = frame.f_back
+                stack = ''.join(f'\33[1;30m{line}\33[0m' for line in format_stack(f=frame, limit=self.limit))
                 if hasattr(record, 'duration') and hasattr(record, 'sql') and hasattr(record, 'params'):
+                    sql = '\n  '.join(f'\33[33m{line}\33[0m' for line in sqlformat(record.sql or '', reindent=True).strip().splitlines())
                     record.msg = (
-                        '\33[31mduration: %s%.4f secs\33[0m, \33[33marguments: \33[1m%s%s\33[0m\n  %s\n \33[1;32m-- stack: \n%s\33[0m'
-                    ) % (
-                        "\33[31m" if record.duration < 0.1 else "\33[1;31m",
-                        record.duration,
-                        "\33[1;33m" if record.params else '',
-                        record.params,
-                        '\n  '.join('\33[33m%s\33[0m' % line for line in sqlformat(record.sql or '', reindent=True).strip().splitlines()),
-                        ''.join('\33[1;30m%s\33[0m' % line for line in format_stack(f=frame, limit=self.limit)),
+                        f'\33[31mduration: \33[{"" if record.duration < 0.1 else "1;"}31m{record.duration:.4f} secs\33[0m, '
+                        f'\33[33marguments: \33[1{";33" if record.params else ""}m{record.params}\33[0m'
+                        f'\n  {sql}\n \33[1;32m-- stack: \n{stack}\33[0m'
                     )
                     record.args = ()
                 else:
-                    record.msg += "\n \33[1;32m-- stack: \n%s\33[0m" % (
-                        ''.join('\33[1;30m%s\33[0m' % line for line in format_stack(f=frame, limit=self.limit))
-                    )
+                    record.msg += f"\n \33[1;32m-- stack: \n{stack}\33[0m"
 
                 record.stack_patched = True
             return True
@@ -279,7 +274,7 @@ if DEBUG_SQL:
     LOGGING['filters']['add_stack'] = {
         '()': WithStacktrace,
         'skip': ("django.db", "south.", "__main__"),
-        'limit': 5,
+        'limit': DEBUG_SQL_LIMIT,
     }
 
 if LOGGING_PATH:
