@@ -29,7 +29,7 @@ if settings.DEBUG:
     ]
 
 try:
-    import uwsgi
+    import uwsgi  # noqa
 except ImportError:
     pass
 else:
