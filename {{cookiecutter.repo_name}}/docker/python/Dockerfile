@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:{{ cookiecutter.dockerfile_version }}
 FROM buildpack-deps:{{ cookiecutter.ubuntu_version }}-scm as deps
 
-ARG POSTGRESQL_VERSION=13
 ARG TZ=UTC
 
 # DEBIAN_FRONTEND=noninteractive exists to prevent tzdata going nuts.
@@ -11,7 +10,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt focal-pgdg main" > /etc/ap
  && apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         python3-dev python3-distutils-extra \
-        libpq-dev=$POSTGRESQL_VERSION.* libpq5=$POSTGRESQL_VERSION.* \
+        libpq-dev={{ cookiecutter.postgresql_version.split('.')|first }}.* libpq5={{ cookiecutter.postgresql_version.split('.')|first }}.* \
         libgdal-dev \
         libtiff-dev libjpeg-dev libzip-dev libfreetype-dev \
         libwebp-dev tcl-dev tk-dev libffi-dev \
@@ -51,8 +50,7 @@ FROM ubuntu:{{ cookiecutter.ubuntu_version }}
 #################
 RUN test -e /etc/apt/apt.conf.d/docker-clean # sanity check
 
-ARG POSTGRESQL_VERSION=13
-ARG TZ=Europe/Bucharest
+ARG TZ={{ cookiecutter.timezone }}
 ENV TZ=$TZ
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -66,7 +64,7 @@ RUN apt-get update \
         socat \
         graphviz \
         dumb-init \
-        libpq5=$POSTGRESQL_VERSION.* postgresql-client-$POSTGRESQL_VERSION \
+        libpq5={{ cookiecutter.postgresql_version.split('.')|first }}.* postgresql-client-{{ cookiecutter.postgresql_version.split('.')|first }} \
         python3-dbg python3-distutils-extra \
         libmemcached11 \
         sudo ca-certificates \
