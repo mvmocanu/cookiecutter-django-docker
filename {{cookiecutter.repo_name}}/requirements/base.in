@@ -43,3 +43,6 @@ ruamel.yaml
 # celery
 celery[redis]
 django-celery-results
+
+uwsgi
+django-uwsgi

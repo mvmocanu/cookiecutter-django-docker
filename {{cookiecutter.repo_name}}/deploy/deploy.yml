@@ -1,0 +1,101 @@
+{%- raw %}
+- hosts: 127.0.0.1
+  connection: local
+  tasks:
+    - name: build image
+      command:
+        chdir: ..
+        cmd: docker-compose -f {{ inventory_dir }}/docker-compose.build.yml build
+      environment:
+        app_version: '{{ app_version }}'
+        registry_host: '{{ registry_host }}'
+    - name: start registry
+      docker_compose:
+        project_name: lt
+        definition:
+          version: '3.7'
+          services:
+            registry:
+              image: registry:2
+              ports:
+                - '{{ registry_port }}:5000'
+              volumes:
+                - '{{ playbook_dir }}/../.home/registry:/var/lib/registry'
+    - name: push image
+      command:
+        cmd: docker push '{{ registry_host }}/{% endraw %}{{ cookiecutter.compose_project_name }}{% raw %}-{{ item }}:{{ app_version }}'
+      with_items:
+        - nginx
+        - '{{ services|list }}'
+        - pg
+- hosts: all
+  tasks:
+    - name: copy release docker-compose.yml
+      copy:
+        src: '{{ inventory_dir }}/docker-compose.release.yml'
+        dest: '/services/{{ compose_file }}'
+    - name: patch ${app_version} in docker-compose.yml
+      replace:
+        dest: '/services/{{ compose_file }}'
+        regexp: '\$\{app_version}'
+        replace: '{{ app_version }}'
+    - name: patch ${registry_host} in docker-compose.yml
+      replace:
+        dest: '/services/{{ compose_file }}'
+        regexp: '\$\{registry_host}'
+        replace: '{{ registry_host }}'
+    - name: get available compose files
+      find:
+        paths: /services
+        patterns: docker-compose*.yml
+      register: compose_files
+    - name: set default docker-compose.yml in environment
+      tags: env
+      lineinfile:
+        dest: /etc/environment
+        regexp: '^COMPOSE_FILE='
+        line: 'COMPOSE_FILE={{ compose_files.files | map(attribute="path") | join(":") }}'
+    - name: start/update services
+      tags: restart
+      docker_compose:
+        project_src: '/services'
+        files: '{{ compose_files.files | map(attribute="path") | list }}'
+    - name: ensure new users/databases
+      shell: |
+        set -eu
+        echo "
+        ####################################
+            $(date)
+        ####################################" >> /services/setup.log
+        docker-compose exec -T pg /docker-entrypoint-initdb.d/extra-users.sh
+    - name: run migrations
+      environment:
+        COMPOSE_FILE: '{{ compose_files.files | map(attribute="path") | join(":") }}'
+      shell: |
+        set -eu
+        echo "
+        ####################################
+            $(date)
+        ####################################" >> /services/{{ item }}/logs/migrations.log
+        docker-compose run --rm -T {{ item }} pysu app django-admin migrate --no-input 2>&1 | tee -a /services/{{ item }}/logs/migrations.log
+        docker-compose run --rm -T {{ item }} pysu app django-admin collectstatic --noinput --clear -v0
+      with_items: '{{ services|list }}'
+    - name: reload nxing
+      environment:
+        COMPOSE_FILE: '{{ compose_files.files | map(attribute="path") | join(":") }}'
+      command:
+        cmd: docker-compose kill -s HUP nginx
+- hosts: 127.0.0.1
+  connection: local
+  tasks:
+    - name: shutdown registry
+      tags: cleanup
+      docker_compose:
+        project_name: lt
+        state: absent
+        definition:
+          version: '3.7'
+          services:
+            registry:
+              image: registry:2
+{%- endraw %}

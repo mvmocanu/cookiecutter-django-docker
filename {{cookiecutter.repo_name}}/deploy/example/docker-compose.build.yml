@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  nginx:
+    image: ${registry_host}/{{ cookiecutter.compose_project_name }}-nginx:${app_version}
+    build:
+      context: ../..
+      dockerfile: docker/python/Dockerfile
+      args:
+        REQUIREMENTS: nginx
+        USER_ID: 2000
+        GROUP_ID: 2000
+{%- for service in cookiecutter.deploy_services.split() %}
+{%- if ':' in service %}
+  {%- set service, domain = service.split(':') %}
+{%- else %}
+  {%- set domain = None %}
+{%- endif %}
+  {{ service }}:
+    image: ${registry_host}/{{ cookiecutter.compose_project_name }}-{{ service }}:${app_version}
+    build:
+      context: ../..
+      dockerfile: docker/python/Dockerfile
+      args:
+        REQUIREMENTS: base
+        DJANGO_SETTINGS_MODULE: evignetteas_project.settings
+        USER_ID: {{ 2000 + loop.index }}
+        GROUP_ID: {{ 2000 + loop.index }}
+{%- if domain %}
+        SERVER_NAME: {{ domain }}
+{%- endif %}
+{%- endfor %}
+  pg:
+    image: ${registry_host}/{{ cookiecutter.compose_project_name }}-pg:${app_version}
+    build:
+      context: ../../docker/postgres

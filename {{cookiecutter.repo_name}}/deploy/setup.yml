@@ -1,0 +1,104 @@
+{%- raw %}
+- hosts: all
+  tasks:
+    - name: debug
+      tags: env
+      vars:
+        msg:
+          registry_host: '{{ registry_host }}'
+          app_version: '{{ app_version }}'
+          compose_file: '{{ compose_file }}'
+          lsb: '{{ ansible_lsb.codename }}'
+      debug:
+        var: msg
+    - name: 'checking dirs'
+      stat:
+        path: '{{ item }}'
+      register: paths
+      with_items:
+        - /services/nginx/logs
+        - /services/nginx/etc
+        - /services/nginx/etc/renewal-hooks/deploy
+        - '{{ []|zip_longest(services, fillvalue="/services/")|map("join", "")|product(["/logs", "/emails", "/etc"])|map("join")|list }}'
+        - /services/pg/logs
+        - /services/pg/data
+    - name: 'making dirs'
+      file:
+        path: '{{ item.item }}'
+        state: directory
+      when: item.stat.exists == false
+      loop: '{{ paths.results }}'
+    - name: 'fixing perms'
+      file:
+        path: '/services/{{ item }}/logs'
+        mode: 0777
+      with_items:
+        - nginx
+        - '{{ services|list }}'
+        - pg
+    - name: 'copy .env'
+      tags: env
+      copy:
+        src: '{{ inventory_dir }}/.env'
+        dest: '/services/{{ item }}/.env'
+        backup: yes
+      loop: '{{ services|list }}'
+    - name: logrotate config
+      copy:
+        dest: '/etc/logrotate.d/{{ item }}'
+        content: |
+          /services/{{ item }}/logs/*.log {
+            compress
+            compressoptions "-9"
+            monthly
+            dateext
+            rotate 36
+            nomail
+            noolddir
+            notifempty
+            noshred
+          }
+      with_items:
+        - nginx
+        - '{{ services|list }}'
+        - pg
+- hosts: all
+  tasks:
+    - name: install docker.com pre-requisites
+      apt:
+        update_cache: yes
+        pkg:
+          - python3-pip
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg-agent
+          - software-properties-common
+    - name: install docker.com key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+    - name: install docker.com repo
+      apt_repository:
+        repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable'
+    - name: install docker
+      apt:
+        pkg:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+    - name: install docker-compose
+      pip:
+        name: docker-compose
+    - name: get available compose files
+      tags: env
+      find:
+        paths: /services
+        patterns: docker-compose*.yml
+      register: compose_files
+    - name: set default docker-compose.yml in environment
+      tags: env
+      lineinfile:
+        dest: /etc/environment
+        regexp: '^COMPOSE_FILE='
+        line: 'COMPOSE_FILE={{ compose_files.files | map(attribute="path") | join(":") }}'
+{%- endraw %}

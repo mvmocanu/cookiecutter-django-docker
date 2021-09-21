@@ -1,0 +1,81 @@
+version: '3.7'
+
+services:
+  nginx:
+    image: ${registry_host}/{{ cookiecutter.compose_project_name }}-nginx:${app_version}
+    restart: unless-stopped
+    ports: ['80:80', '443:443']
+    volumes:
+      - /services/nginx/etc:/etc/letsencrypt
+      - /services/nginx/logs:/var/log/letsencrypt
+      - /services/nginx/logs:/app/logs
+{%- for service in cookiecutter.deploy_services.split() %}
+{%- if ':' in service %}
+{%- set service, domain = service.split(':') %}
+      - /services/{{ service }}/static:/shared/{{ domain }}/static
+      - /services/{{ service }}/etc:/shared/{{ domain }}/etc
+      - /services/{{ service }}/run:/shared/{{ domain }}/run
+      - /services/{{ service }}/.well-known:/shared/{{ domain }}/.well-known
+{%- endif %}
+{%- endfor %}
+    command: [ 'nginx' ]
+{%- for service in cookiecutter.deploy_services.split() %}
+{%- if ':' in service %}
+  {%- set service, domain = service.split(':') %}
+{%- else %}
+  {%- set domain = None %}
+{%- endif %}
+  {{ service }}:
+    image: ${registry_host}/{{ cookiecutter.compose_project_name }}-{{ service }}:${app_version}
+    env_file:
+      - /services/{{ service }}/.env
+    restart: unless-stopped
+    volumes:
+      - /services/{{ service }}/static:/app/static
+      - /services/{{ service }}/logs:/app/logs
+      - /services/{{ service }}/run:/app/run
+      - /services/{{ service }}/etc:/etc/app
+    depends_on:
+      - pg
+      - mc
+      - redis
+    entrypoint: [ '/entrypoint.sh' ]
+{%- if service == 'celery' %}
+    command: [ 'pysu', 'app', 'celery', '-A', '{{ cookiecutter.django_project_name }}', 'worker' ]
+{%- elif service == 'cron' %}
+    command: [ 'pysu', 'app', 'yacron', '--config=/etc/app/yacron.yml' ]
+{%- elif domain %}
+    command: [ 'uwsgi', '--ini', '/etc/app/uwsgi.ini' ]
+{%- else %}
+    command: [ 'pysu', 'app', '{{ service }}' ]
+{%- endif %}
+{%- endfor %}
+  pg:
+    image: ${registry_host}/{{ cookiecutter.compose_project_name }}-pg:${app_version}
+    restart: unless-stopped
+    command: [
+      'postgres',
+      '-c', 'log_lock_waits=true',
+      '-c', 'log_min_error_statement=WARNING',
+      '-c', 'log_min_duration_statement=1s',
+      '-c', 'log_destination=stderr',
+      '-c', 'logging_collector=on',
+      '-c', 'log_directory=/var/log/postgresql',
+      '-c', 'log_filename=pg-%Y-%m-%d.log',
+      '-c', 'log_truncate_on_rotation=off',
+      '-c', 'log_rotation_age=1d',
+      '-c', 'log_rotation_size=0',
+    ]
+    shm_size: 256MB
+    volumes:
+      - /services/pg/data:/var/lib/postgresql/data
+      - /services/pg/logs:/var/log/postgresql
+    environment:
+      PGUSER: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_EXTRAS: 
+  mc:
+    image: memcached:{{ cookiecutter.memcached_version }}
+  redis:
+    image: redis:{{ cookiecutter.redis_version }}

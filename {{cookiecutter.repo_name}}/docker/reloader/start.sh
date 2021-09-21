@@ -19,17 +19,20 @@ while true; do
             --event Overflow \
             --one-event --monitor ${RELOADER_MONITOR:-inotify}_monitor src | \
     while read event; do
-        if [[ $event == /app/src ]]; then
+        if [[ $event == /app/src || $event =~ .*~$ ]]; then
             echo -e "\033[1;33m[$(date -Iseconds)] Skipping bogus change in:\033[0m $event"
             continue
         fi
         echo -e "\033[1;36m[$(date -Iseconds)] Detected change in:\033[0m $event"
         if [[ $event =~ .*/static(/|$) ]]; then
             echo -e "\033[1;34m[$(date -Iseconds)] Running collectstatic ..."
-            docker exec {{ cookiecutter.compose_project_name }}_web_1 django-admin collectstatic --no-input || echo -e "\033[1;31m[$(date -Iseconds)] Failed to run collectstatic!"
+            docker exec {{ cookiecutter.compose_project_name }}_web_1 django-admin collectstatic --no-input -v0 || echo -e "\033[1;31m[$(date -Iseconds)] Failed to run collectstatic!"
         else
+            echo -e "\033[1;34m[$(date -Iseconds)] Attempting restarts ..."
+            echo r > /app/run/uwsgi.fifo
             pids=()
             for name in $(docker ps --format '{{ '{{ .Names }}' }}' | grep ^{{ cookiecutter.compose_project_name }}_ | egrep -v '{{ cookiecutter.compose_project_name }}_reloader|{{ cookiecutter.compose_project_name }}_pg|{{ cookiecutter.compose_project_name }}_redis'); do
+                echo "+ docker restart $name"
                 docker restart $name &
                 pids+=($!)
             done

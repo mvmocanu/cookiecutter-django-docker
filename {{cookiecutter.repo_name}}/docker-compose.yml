@@ -1,4 +1,4 @@
-version: "{{ cookiecutter.docker_compose_version }}"
+version: '{{ cookiecutter.docker_compose_version }}'
 
 x-python:
   &python
@@ -21,7 +21,7 @@ x-python:
     - .:/app
     - ./.home:/root
     - ./.home:/home/app
-    - ./.home/media:/var/app/media
+    - ./.home/media:/app/media
 services:
   pg:
     build:
@@ -31,14 +31,10 @@ services:
       POSTGRES_PASSWORD: app
       POSTGRES_DB: app
     command: [
-        "postgres",
-      #      "-c", "log_statement=all",
-      #      "-c", "log_duration=true",
-      #      "-c", "log_disconnections=true",
-      #      "-c", "log_connections=true",
-        "-c", "log_lock_waits=true",
-        "-c", "log_min_error_statement=WARNING",
-        "-c", "log_min_duration_statement=1s",
+      'postgres',
+      '-c', 'log_lock_waits=true',
+      '-c', 'log_min_error_statement=WARNING',
+      '-c', 'log_min_duration_statement=1s',
     ]
     volumes:
       - .:/app
@@ -54,21 +50,21 @@ services:
     <<: *python
     depends_on:
       - pg
-    entrypoint: [ "/entrypoint.sh" ]
-    command: [ "pysu", "app", "yacron", "--config=/etc/app/yacron.yml" ]
+    entrypoint: [ '/entrypoint.sh' ]
+    command: [ 'pysu', 'app', 'yacron', '--config=/etc/app/yacron.yml' ]
 
   web:
     <<: *python
     depends_on:
-    - pg
-    - mc
-    - redis
-    entrypoint: [ "/entrypoint.sh" ]
+      - pg
+      - mc
+      - redis
+    entrypoint: [ '/entrypoint.sh' ]
 
   celery:
     <<: *python
-    entrypoint: [ "/entrypoint.sh" ]
-    command: [ "pysu", "app", "celery", "-A", "{{ cookiecutter.django_project_name }}", "worker" ]
+    entrypoint: [ '/entrypoint.sh' ]
+    command: [ 'pysu', 'app', 'celery', '-A', '{{ cookiecutter.django_project_name }}', 'worker' ]
     depends_on:
-    - pg
-    - redis
+      - pg
+      - redis

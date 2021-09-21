@@ -1,10 +1,11 @@
-# syntax=docker/dockerfile:1.2.1
+# syntax=docker/dockerfile:{{ cookiecutter.dockerfile_version }}
 FROM buildpack-deps:{{ cookiecutter.ubuntu_version }}-scm as deps
 
 ARG POSTGRESQL_VERSION=13
 ARG TZ=UTC
 
-# DEBIAN_FRONTEND=noninteractive exists to prevent tzdata going nuts (maybe dpkg incorrectly detects interactive on buildkit containers?)
+# DEBIAN_FRONTEND=noninteractive exists to prevent tzdata going nuts.
+# Maybe dpkg incorrectly detects interactive on buildkit containers?
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt focal-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
  && curl -fsSL11 'https://www.postgresql.org/media/keys/ACCC4CF8.asc' | apt-key add - \
  && apt-get update \
@@ -16,30 +17,33 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt focal-pgdg main" > /etc/ap
         libwebp-dev tcl-dev tk-dev libffi-dev \
         libmemcached-dev zlib1g-dev \
         build-essential git sudo ca-certificates
-# avoid having to use python3 all over the place
+# Avoid having to use python3 all over the place.
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
 
-ARG PYTHON_PIP_VERSION={{ cookiecutter.pip_version }}
-ARG PYTHON_SETUPTOOLS_VERSION={{ cookiecutter.setuptools_version }}
 RUN bash -o pipefail -c "curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | \
-    python - --no-cache --disable-pip-version-check --upgrade pip==$PYTHON_PIP_VERSION setuptools==$PYTHON_SETUPTOOLS_VERSION"
+    python - --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}"
 
+# This indents to be the sole Dockerfile for the project so allow building variants with different or no dependencies.
 COPY requirements /requirements
-#ENV PATH=$PATH:/usr/pgsql-13/bin
 ARG REQUIREMENTS
 RUN --mount=type=cache,target=/root/.cache set -x \
- && python -mpip wheel --wheel-dir=/wheels -r requirements/$REQUIREMENTS.txt \
- && ls -al /wheels
+ && mkdir /deps \
+ && if [ -n "$REQUIREMENTS" ] \
+  ; then python -mpip wheel --wheel-dir=/deps/wheels -r requirements/$REQUIREMENTS.txt \
+ && ls -al /deps/wheels \
+  ; else echo 'No REQUIREMENTS defined!' \
+  ; fi
+
 
 ##################################
 ##################################
 FROM buildpack-deps:{{ cookiecutter.ubuntu_version }} as certs
 ##################################
-RUN mkdir /etc/app \
+ARG SERVER_NAME="localhost"
+RUN mkdir /certs \
  && openssl req -x509 -nodes -newkey rsa:4096 -sha256 \
-                -out /etc/app/certificate.crt -keyout /etc/app/certificate.key \
-                -subj '/CN=localhost'
-ADD https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem /etc/app/dhparams.pem
+                -out /certs/fullchain.pem -keyout /certs/privkey.pem \
+                -subj "/CN=$SERVER_NAME"
 
 #################
 #################
@@ -66,35 +70,36 @@ RUN apt-get update \
         python3-dbg python3-distutils-extra \
         libmemcached11 \
         sudo ca-certificates \
-        apache2 libapache2-mod-wsgi-py3 \
+        nginx \
         gdal-bin python3-gdal
-# avoid having to use python3 all over the place
+# Avoid having to use python3 all over the place.
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
 
-# adds a new user named python and add it to the list of sudoers. Will be able to call sudo without the password
+# Adds a new user named python and add it to the list of sudoers. Will be able to call sudo without the password.
+# This is more geared to development (eg: match user's UID) than production (where you shouln't need any sudo/home).
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 RUN groupadd --gid $GROUP_ID app \
  && useradd --uid $USER_ID --gid $GROUP_ID --shell /bin/bash --create-home app \
  && echo "app ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
 
-ARG PYTHON_PIP_VERSION=21.1.1
-ARG PYTHON_SETUPTOOLS_VERSION=56.2.0
 RUN bash -o pipefail -c "curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | \
-    python - --no-cache --disable-pip-version-check --upgrade pip==$PYTHON_PIP_VERSION setuptools==$PYTHON_SETUPTOOLS_VERSION"
+    python - --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}"
 
-RUN --mount=type=bind,from=deps,src=/wheels,target=/deps \
-    pip install --force-reinstall --ignore-installed --upgrade --no-index --no-deps /deps/*
+RUN --mount=type=bind,from=deps,src=/deps,target=/deps set -x \
+ && if [ -e /deps/wheels ] \
+  ; then pip install --force-reinstall --ignore-installed --upgrade --no-index --no-deps /deps/wheels/* \
+  ; else echo 'No wheels built!' \
+  ; fi
 
-RUN mkdir /app /var/app /var/app/logs /var/app/static \
- && chown -R app:app /app /var/app
+RUN mkdir /app /app/logs /app/static /etc/app \
+ && chown -R app:app /app
 
-COPY --from=certs /etc/app /etc/app
 
 RUN echo /app/src > $(python -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())')/app.pth
 
-RUN ln -sf /proc/self/fd/2 /var/app/logs/httpd_error.log \
- && ln -sf /proc/self/fd/1 /var/app/logs/httpd_access.log
+RUN ln -sf /proc/self/fd/2 /app/logs/httpd_error.log \
+ && ln -sf /proc/self/fd/1 /app/logs/httpd_access.log
 
 COPY src /app/src
 
@@ -103,16 +108,26 @@ ENV PYTHONFAULTHANDLER=x
 
 ARG DJANGO_SETTINGS_MODULE
 ENV DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
-
-# Fillins for settings that aren't optional but are needed for collectstatic
-# ARG is used to avoid persisting these variables
 ARG DJANGO_SECRET_KEY="n/a"
-ARG SERVER_NAME="docker"
 
 WORKDIR /app
-RUN pysu app django-admin collectstatic --noinput -v0 --clear --link
+
+ARG DJANGO_COLLECTSTATIC
+RUN set -x \
+ && if [ -n "$DJANGO_COLLECTSTATIC" ] \
+  ; then sphinx-build src/api/docs/ src/api/static/api/docs/_build/html \
+ && django-admin collectstatic --noinput --clear -v0 \
+  ; fi
 
 COPY docker/python/entrypoint.sh /
-COPY docker/python/httpd.conf /etc/app
-COPY docker/python/yacron.yml /etc/app
-RUN cp -r /etc/app /etc/app-defaults
+COPY docker/python/uwsgi.ini /etc/app/
+COPY docker/python/nginx.conf /etc/nginx/
+COPY docker/python/nginx.site /etc/app/
+COPY docker/python/yacron.yml /etc/app/
+COPY --from=certs /certs/* /etc/app
+ADD https://ssl-config.mozilla.org/ffdhe2048.txt /etc/nginx/dhparam
+
+ARG SERVER_NAME="localhost"
+RUN envsubst < /etc/app/nginx.site > /etc/app/nginx.conf
+RUN cp /etc/app/fullchain.pem /etc/app/chain.pem \
+ && cp -r /etc/app /etc/app-defaults

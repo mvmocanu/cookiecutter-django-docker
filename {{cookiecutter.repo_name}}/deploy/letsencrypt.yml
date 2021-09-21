@@ -1,0 +1,47 @@
+{% raw %}
+- hosts: all
+  tasks:
+    - name: deploy hook
+      copy:
+        dest: /services/nginx/etc/renewal-hooks/deploy/run
+        mode: 0777
+        content: |
+          #!/bin/bash -eux
+          cp $RENEWED_LINEAGE/*.pem /shared/$RENEWED_DOMAINS/etc/
+          ps fauxww
+          kill -HUP 1
+    - name: install renewal cron job
+      cron:
+        name: certbot_renew
+        minute: '0'
+        hour: '1'
+        job: docker-compose exec -T nginx certbot renew
+    - name: initial setup
+      shell: |
+        set -eu
+        echo "
+        ####################################
+            $(date)
+        ####################################" >> /services/nginx/logs/certbot.log
+        docker-compose run --rm -T nginx certbot certonly \
+          --webroot \
+          --agree-tos \
+          --preferred-challenges=http-01 \
+          --email={% endraw %}{{ cookiecutter.deploy_letencrypt_email }}{% raw %} \
+          --webroot-path=/shared/{{ item }} \
+          --domain={{ item }} \
+          --non-interactive \
+          --keep-until-expiring 2>&1 | tee -a /services/nginx/logs/setup.log
+      with_items: {{ letsencrypt_domains|list }}
+    - name: manually copy certs
+      shell: |
+        set -eu
+        docker-compose run --rm -T \
+          -e 'RENEWED_LINEAGE=/etc/letsencrypt/live/{{ item }}' \
+          -e 'RENEWED_DOMAINS={{ item }}' \
+          nginx /etc/letsencrypt/renewal-hooks/deploy/run
+      with_items: {{ letsencrypt_domains|list }}
+    - name: reload nginx
+      command:
+        cmd: docker-compose kill -s HUP nginx
+{% endraw %}

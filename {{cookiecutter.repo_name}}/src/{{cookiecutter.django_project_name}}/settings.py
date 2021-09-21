@@ -30,7 +30,6 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 DEBUG = os.environ.get('DJANGO_DEBUG', '').lower() in ['yes', 'true', 'y', '1']
 DEBUG_SQL = os.environ.get('DJANGO_DEBUG_SQL', '').lower() in ['yes', 'true', 'y', '1']
 DEBUG_TOOLBAR = os.environ.get('DJANGO_DEBUG_TOOLBAR', '').lower() in ['yes', 'true', 'y', '1']
-SERVER_NAME = os.environ['SERVER_NAME']
 LOGGING_PATH = os.environ.get('LOGGING_PATH')
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
@@ -143,12 +142,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/stable/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/var/app/static/'
+STATIC_ROOT = '/app/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, '{{ cookiecutter.django_project_name }}', 'static'),
 ]
 
-MEDIA_ROOT = '/var/app/media/'
+MEDIA_ROOT = '/app/media/'
 
 
 # Default primary key field type

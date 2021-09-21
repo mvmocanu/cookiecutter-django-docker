@@ -14,7 +14,7 @@ defaults:
     producesStdout: false
     producesStderr: false
 jobs:
-  - name: stff
+  - name: stuff
     schedule:
       minute: "*/1"
     command: django-admin stuff

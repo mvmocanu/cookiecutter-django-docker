@@ -7,7 +7,7 @@ services:
       dockerfile: docker/python/Dockerfile
       args:
         REQUIREMENTS: test
-        DJANGO_SETTINGS_MODULE: {{ cookiecutter.django_project_name }}.settings_test
+        DJANGO_SETTINGS_MODULE: '{{ cookiecutter.django_project_name }}.settings_test'
     entrypoint: /app/test-entrypoint.sh
     env_file:
       - .env-test
@@ -18,10 +18,21 @@ services:
       PYTHONHUNTERCONFIG:
       SERVER_NAME: localhost
       DJANGO_SECRET_KEY: test123
-      SENTRY_DSN: ""
+      SENTRY_DSN: ''
     stop_signal: SIGINT
     depends_on:
       - pg
     volumes:
       - $PWD:/app
       - $PWD/.home:/home/app
+  pg:
+    command: [
+        'postgres',
+        '-c', 'log_statement=all',
+        '-c', 'log_duration=true',
+        '-c', 'log_disconnections=true',
+        '-c', 'log_connections=true',
+        '-c', 'log_lock_waits=true',
+        '-c', 'log_min_error_statement=WARNING',
+        '-c', 'log_min_duration_statement=1s',
+    ]

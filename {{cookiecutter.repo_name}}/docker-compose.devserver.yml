@@ -1,26 +1,24 @@
 # An alternative dev configuration the the more simple devserver (easier to debug but you lose dev-prod parity)
 # Note: migrations are not run automatically!
-version: "{{ cookiecutter.docker_compose_version }}"
+version: '{{ cookiecutter.docker_compose_version }}'
 
 services:
   pg:
     ports:
-      - "5432:5432"
+      - '5432:5432'
   web:
     environment:
-      DJANGO_DB_MIGRATE: "yes"
+      DJANGO_DB_MIGRATE: 'yes'
     privileged: true
     ports:
-      - "80:8000"
+      - '80:8000'
     command: [
-      "django-admin",
-      "runserver",
-      "--insecure",
-#      "--nothreading",
-#      "--noreload",
-      "0.0.0.0:8000"
+      'django-admin',
+      'runserver',
+      '--insecure',
+      '0.0.0.0:8000'
     ]
     stop_signal: SIGINT
 
   celery:
-    command: ["celery", "-A", "{{ cookiecutter.django_project_name }}", "worker", "-l", "debug"]
+    command: [ 'celery', '-A', '{{ cookiecutter.django_project_name }}', 'worker', '-l', 'debug' ]

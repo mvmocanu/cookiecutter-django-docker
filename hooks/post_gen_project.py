@@ -66,6 +66,9 @@ if __name__ == "__main__":
     if not os.path.exists('requirements/test.txt'):
         note('+ pip-compile --upgrade requirements/test.in')
         subprocess.check_call(['pip-compile', '--upgrade', 'requirements/test.in'])
+    if not os.path.exists('requirements/nginx.txt'):
+        note('+ pip-compile --upgrade requirements/nginx.in')
+        subprocess.check_call(['pip-compile', '--upgrade', 'requirements/nginx.in'])
     if not os.path.exists('.git'):
         warn('+ git init')
         subprocess.check_call(['git', 'init'])
