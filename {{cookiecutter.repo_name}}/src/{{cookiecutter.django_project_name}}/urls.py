@@ -28,6 +28,15 @@ if settings.DEBUG:
         path(r'rosetta/', include('rosetta.urls')),
     ]
 
+try:
+    import uwsgi
+except ImportError:
+    pass
+else:
+    urlpatterns += [
+        path('admin/uwsgi/', include('django_uwsgi.urls')),
+    ]
+
 if settings.DEBUG_TOOLBAR:
     import debug_toolbar
 

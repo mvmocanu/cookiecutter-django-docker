@@ -283,30 +283,28 @@ if DEBUG_SQL:
     }
 
 if LOGGING_PATH:
-    LOGGING['handlers'].update({
-        'logfile': {
-            'level': 'INFO',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'encoding': 'utf-8',
-            'filename': f'{LOGGING_PATH}/application.log',
-            'formatter': 'verbose',
-        },
-        'debugfile': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'encoding': 'utf-8',
-            'filename': f'{LOGGING_PATH}/debug.log',
-            'formatter': 'verbose',
-        },
-    })
+    LOGGING['handlers']['logfile'] = {
+        'level': 'INFO',
+        'class': 'logging.handlers.WatchedFileHandler',
+        'encoding': 'utf-8',
+        'filename': f'{LOGGING_PATH}/application.log',
+        'formatter': 'verbose',
+    }
+    LOGGING['handlers']['debugfile'] = {
+        'level': 'DEBUG',
+        'class': 'logging.handlers.WatchedFileHandler',
+        'encoding': 'utf-8',
+        'filename': f'{LOGGING_PATH}/debug.log',
+        'formatter': 'verbose',
+    }
     LOGGING['root']['handlers'] = ['logfile', 'debugfile']
     LOGGING['loggers']['django.request']['handlers'] = ['logfile']
     LOGGING['loggers']['django.db.backends']['handlers'] = ['debugfile']
 
 if DEBUG:
-    INSTALLED_APPS += (
+    INSTALLED_APPS += [
         'rosetta',
-    )
+    ]
 
 if DEBUG_TOOLBAR:
     INSTALLED_APPS += 'debug_toolbar',
