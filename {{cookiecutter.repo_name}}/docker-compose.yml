@@ -24,7 +24,7 @@ x-python:
     - ./.home:/root
     - ./.home:/home/app
     - ./.home/media:/app/media
-    - ./.home/etc:/app/etc
+    - ./.home/etc:/etc/app
     - ./.home/logs:/app/logs
     - ./.home/static:/app/static
 services:
