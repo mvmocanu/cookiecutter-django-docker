@@ -14,7 +14,6 @@ from pathlib import Path
 
 from django.utils.translation import gettext_lazy as _
 
-
 PROJECT_VERSION = '0.1.0'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -45,10 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'django_celery_results',
     'django_extensions',
-
     '{{cookiecutter.django_app_name}}.apps.{{ cookiecutter.django_app_name|replace('_', ' ')|title|replace(' ', '') }}Config',
 ]
 
@@ -114,7 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    }
+    },
 ]
 
 
@@ -203,8 +200,7 @@ LOGGING = {
             'propagate': False,
         },
     },
-    'filters': {
-    }
+    'filters': {},
 }
 
 
@@ -212,6 +208,7 @@ LOGGING = {
 SENTRY_DSN = os.environ.get('SENTRY_DSN')
 if SENTRY_DSN:
     import logging
+
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
     from sentry_sdk.integrations.logging import LoggingIntegration
@@ -226,7 +223,7 @@ if SENTRY_DSN:
             LoggingIntegration(
                 level=logging.INFO,
                 event_level=logging.ERROR,
-            )
+            ),
         ],
         send_default_pii=True,
         auto_session_tracking=False,
@@ -240,7 +237,6 @@ if DEBUG_SQL:
     except ImportError:
         sqlformat = lambda s, reindent=None: s
     from traceback import format_stack
-
 
     class WithStacktrace(object):
         def __init__(self, skip=(), limit=5):
@@ -267,7 +263,6 @@ if DEBUG_SQL:
 
                 record.stack_patched = True
             return True
-
 
     LOGGING['loggers']['django.db.backends']['level'] = 'DEBUG'
     LOGGING['loggers']['django.db.backends']['filters'] = ['add_stack']
@@ -302,7 +297,9 @@ if DEBUG:
     ]
 
 if DEBUG_TOOLBAR:
-    INSTALLED_APPS += 'debug_toolbar',
+    INSTALLED_APPS += [
+        'debug_toolbar',
+    ]
     MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
     DEBUG_TOOLBAR_CONFIG = {
         'SHOW_TOOLBAR_CALLBACK': lambda _: DEBUG,

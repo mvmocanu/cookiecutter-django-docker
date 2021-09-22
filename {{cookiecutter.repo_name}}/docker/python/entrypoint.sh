@@ -5,8 +5,8 @@ chown -R app:app /app/run /app/static
 for path in /etc/app-defaults/*; do
   name=$(basename "$path")
   if [[ ! -e "/etc/app/$name" ]]; then
-    echo "+ cp /etc/app-defaults/$name /etc/app/$name"
-    cp "/etc/app-defaults/$name" "/etc/app/$name"
+    echo "+ ln /etc/app-defaults/$name /etc/app/$name"
+    ln -s "/etc/app-defaults/$name" "/etc/app/$name"
   fi
 done
 if [[ -n "${DJANGO_COLLECTSTATIC:-}" ]]; then

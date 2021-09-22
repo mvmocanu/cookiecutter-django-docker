@@ -9,6 +9,8 @@ coverage.xml
 .cache
 test-results/
 .pytest_cache
+
+# local dev data
 .home
 
 # editors
@@ -21,7 +23,10 @@ test-results/
 
 # local docker-compose settings
 .env
+
+# deployment settings
 .env-production
+deploy/*/.env*
 
 # logs
 *.log
