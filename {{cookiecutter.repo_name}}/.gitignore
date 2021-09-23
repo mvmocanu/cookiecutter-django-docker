@@ -12,6 +12,7 @@ test-results/
 
 # local dev data
 .home
+node_modules
 
 # editors
 *.sw*
