@@ -29,9 +29,9 @@ while true; do
             docker exec {{ cookiecutter.compose_project_name }}_web_1 django-admin collectstatic --no-input -v0 || echo -e "\033[1;31m[$(date -Iseconds)] Failed to run collectstatic!"
         else
             echo -e "\033[1;34m[$(date -Iseconds)] Attempting restarts ..."
-            echo r > /app/run/uwsgi.fifo
+            echo r > /var/app/run/uwsgi.fifo
             pids=()
-            for name in $(docker ps --format '{{ '{{ .Names }}' }}' | grep ^{{ cookiecutter.compose_project_name }}_ | egrep -v '{{ cookiecutter.compose_project_name }}_reloader|{{ cookiecutter.compose_project_name }}_pg|{{ cookiecutter.compose_project_name }}_redis'); do
+            for name in $(docker ps --format '{{ '{{ .Names }}' }}' | egrep '^{{ cookiecutter.compose_project_name }}_(celery|cron)'); do
                 echo "+ docker restart $name"
                 docker restart $name &
                 pids+=($!)

@@ -1,4 +1,4 @@
-version: '3.7'
+version: '{{ cookiecutter.docker_compose_version }}'
 
 services:
   pg:
@@ -22,12 +22,14 @@ services:
       - .env
     tty: false
     volumes:
-      - .:/shared/${SERVER_NAME}
+      - ./.home:/shared/${SERVER_NAME}
+      - ./.home/nginx/etc:/etc/app
     depends_on:
       - web
     ports:
       - '80:80'
       - '443:443'
+    entrypoint: [ '/entrypoint.sh' ]
     command: [
       'holdup',
       '--verbose', 'unix:///shared/${SERVER_NAME}/run/uwsgi.sock',
@@ -46,13 +48,12 @@ services:
     depends_on:
       - pg
     stop_signal: SIGTERM
-    volumes:
-      - ./etc:/etc/app
   reloader:
     build:
       context: docker/reloader
     volumes:
       - .:/app
+      - ./.home:/var/app
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       RELOADER_MONITOR:

@@ -1,4 +1,4 @@
-{%- raw %}
+{% raw -%}
 - hosts: all
   tasks:
     - name: debug
@@ -101,4 +101,9 @@
         dest: /etc/environment
         regexp: '^COMPOSE_FILE='
         line: 'COMPOSE_FILE={{ compose_files.files | map(attribute="path") | join(":") }}'
-{%- endraw %}
+    - name: update services after env update
+      tags: [ never, env ]
+      docker_compose:
+        project_src: '/services'
+        files: '{{ compose_files.files | map(attribute="path") | list }}'
+{% endraw -%}

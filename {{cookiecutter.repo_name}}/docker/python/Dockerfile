@@ -90,14 +90,13 @@ RUN --mount=type=bind,from=deps,src=/deps,target=/deps set -x \
   ; else echo 'No wheels built!' \
   ; fi
 
-RUN mkdir /app /app/logs /app/static /etc/app \
+RUN mkdir -p /app /var/app/logs /var/app/static /etc/app \
  && chown -R app:app /app
-
 
 RUN echo /app/src > $(python -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())')/app.pth
 
-RUN ln -sf /proc/self/fd/2 /app/logs/httpd_error.log \
- && ln -sf /proc/self/fd/1 /app/logs/httpd_access.log
+RUN ln -sf /proc/self/fd/2 /var/app/logs/httpd_error.log \
+ && ln -sf /proc/self/fd/1 /var/app/logs/httpd_access.log
 
 COPY src /app/src
 
@@ -118,13 +117,15 @@ RUN set -x \
 
 COPY docker/python/entrypoint.sh /
 COPY docker/python/uwsgi.ini /etc/app/
-COPY docker/python/nginx.conf /etc/nginx/
-COPY docker/python/nginx.site /etc/app/
+COPY docker/python/nginx.conf /etc/app/
+COPY docker/python/nginx.site /tmp/
 COPY docker/python/yacron.yml /etc/app/
 COPY --from=certs /certs/* /etc/app
-ADD https://ssl-config.mozilla.org/ffdhe2048.txt /etc/nginx/dhparam
+ADD https://ssl-config.mozilla.org/ffdhe2048.txt /etc/app/dhparam
 
 ARG SERVER_NAME="localhost"
-RUN envsubst < /etc/app/nginx.site > /etc/app/nginx.conf
+RUN envsubst < /tmp/nginx.site > /etc/app/nginx.site
 RUN cp /etc/app/fullchain.pem /etc/app/chain.pem \
+ && ln -sf /etc/app/nginx.conf /etc/nginx/nginx.conf \
+ && cp /etc/nginx/mime.types /etc/app \
  && cp -r /etc/app /etc/app-defaults

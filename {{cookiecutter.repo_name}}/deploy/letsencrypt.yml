@@ -1,4 +1,4 @@
-{% raw %}
+{% raw -%}
 - hosts: all
   tasks:
     - name: deploy hook
@@ -32,7 +32,7 @@
           --domain={{ item }} \
           --non-interactive \
           --keep-until-expiring 2>&1 | tee -a /services/nginx/logs/setup.log
-      with_items: {{ letsencrypt_domains|list }}
+      loop: '{{ letsencrypt_domains|list }}'
     - name: manually copy certs
       shell: |
         set -eu
@@ -40,8 +40,8 @@
           -e 'RENEWED_LINEAGE=/etc/letsencrypt/live/{{ item }}' \
           -e 'RENEWED_DOMAINS={{ item }}' \
           nginx /etc/letsencrypt/renewal-hooks/deploy/run
-      with_items: {{ letsencrypt_domains|list }}
+      loop: '{{ letsencrypt_domains|list }}'
     - name: reload nginx
       command:
         cmd: docker-compose kill -s HUP nginx
-{% endraw %}
+{% endraw -%}

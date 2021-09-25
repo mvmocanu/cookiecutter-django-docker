@@ -1,4 +1,4 @@
-version: '3.7'
+version: '{{ cookiecutter.docker_compose_version }}'
 
 services:
   nginx:
@@ -8,7 +8,7 @@ services:
     volumes:
       - /services/nginx/etc:/etc/letsencrypt
       - /services/nginx/logs:/var/log/letsencrypt
-      - /services/nginx/logs:/app/logs
+      - /services/nginx/logs:/var/app/logs
 {%- for service in cookiecutter.deploy_services.split() %}
 {%- if ':' in service %}
 {%- set service, domain = service.split(':') %}
@@ -31,9 +31,9 @@ services:
       - /services/{{ service }}/.env
     restart: unless-stopped
     volumes:
-      - /services/{{ service }}/static:/app/static
-      - /services/{{ service }}/logs:/app/logs
-      - /services/{{ service }}/run:/app/run
+      - /services/{{ service }}/static:/var/app/static
+      - /services/{{ service }}/logs:/var/app/logs
+      - /services/{{ service }}/run:/var/app/run
       - /services/{{ service }}/etc:/etc/app
     depends_on:
       - pg
@@ -74,7 +74,7 @@ services:
       PGUSER: app
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
-      POSTGRES_EXTRAS: 
+      POSTGRES_EXTRAS:
   mc:
     image: memcached:{{ cookiecutter.memcached_version }}
   redis:

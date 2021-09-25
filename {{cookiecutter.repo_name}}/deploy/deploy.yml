@@ -1,4 +1,4 @@
-{%- raw %}
+{% raw -%}
 - hosts: 127.0.0.1
   connection: local
   tasks:
@@ -11,7 +11,7 @@
         registry_host: '{{ registry_host }}'
     - name: start registry
       docker_compose:
-        project_name: lt
+        project_name: {% endraw %}{{ cookiecutter.compose_project_name }}{% raw %}
         definition:
           version: '3.7'
           services:
@@ -79,23 +79,23 @@
         ####################################" >> /services/{{ item }}/logs/migrations.log
         docker-compose run --rm -T {{ item }} pysu app django-admin migrate --no-input 2>&1 | tee -a /services/{{ item }}/logs/migrations.log
         docker-compose run --rm -T {{ item }} pysu app django-admin collectstatic --noinput --clear -v0
-      with_items: '{{ services|list }}'
+      loop: '{{ services|list }}'
     - name: reload nxing
       environment:
         COMPOSE_FILE: '{{ compose_files.files | map(attribute="path") | join(":") }}'
       command:
         cmd: docker-compose kill -s HUP nginx
+{%- endraw %}
 - hosts: 127.0.0.1
   connection: local
   tasks:
     - name: shutdown registry
       tags: cleanup
       docker_compose:
-        project_name: lt
+        project_name: {{ cookiecutter.compose_project_name }}
         state: absent
         definition:
           version: '3.7'
           services:
             registry:
               image: registry:2
-{%- endraw %}

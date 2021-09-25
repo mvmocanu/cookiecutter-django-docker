@@ -23,10 +23,8 @@ x-python:
     - .:/app
     - ./.home:/root
     - ./.home:/home/app
-    - ./.home/media:/app/media
+    - ./.home:/var/app
     - ./.home/etc:/etc/app
-    - ./.home/logs:/app/logs
-    - ./.home/static:/app/static
 services:
   pg:
     build:

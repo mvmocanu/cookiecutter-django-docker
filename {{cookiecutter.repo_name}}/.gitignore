@@ -18,6 +18,7 @@ node_modules
 *.sw*
 .idea
 *.sublime-*
+*.bak
 
 # osx
 .DS_Store
@@ -31,4 +32,3 @@ deploy/*/.env*
 
 # logs
 *.log
-

@@ -60,7 +60,7 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
 ]
 
-ROOT_URLCONF = '{{ cookiecutter.django_project_name }}.urls'
+ROOT_URLCONF = os.environ.get('DJANGO_ROOT_URLCONF', '{{ cookiecutter.django_project_name }}.urls')
 
 TEMPLATES = [
     {
@@ -96,6 +96,17 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': os.environ.get(
+            'DJANGO_CACHE_BACKEND',
+            'django.core.cache.backends.dummy.DummyCache' if DEBUG else 'django.core.cache.backends.locmem.LocMemCache',
+        ),
+        'LOCATION': os.environ.get('DJANGO_CACHE_LOCATION'),
+        'KEY_PREFIX': os.environ.get('DJANGO_CACHE_KEY_PREFIX'),
+    }
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/stable/ref/settings/#auth-password-validators
 
@@ -113,7 +124,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/stable/topics/i18n/
@@ -140,19 +150,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/stable/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/app/static/'
+STATIC_ROOT = '/var/app/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, '{{ cookiecutter.django_project_name }}', 'static'),
 ]
 
-MEDIA_ROOT = '/app/media/'
-
+MEDIA_ROOT = '/var/app/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/stable/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')

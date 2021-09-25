@@ -10,6 +10,8 @@
   "django_app_name": "{{ cookiecutter.name.lower().replace(' ','_').replace('-','_') }}",
   "deploy_letencrypt_email": "admin@example.com",
   "deploy_services": "demo:demo.example.com celery cron",
+  "deploy_ansible_host": "1.2.3.4",
+  "deploy_ansible_port": "22",
   "django_allowed_hosts": "{{ cookiecutter.deploy_services.split()[0].split(':')[-1] }}",
   "short_description": "An example project. Generated with ionelmc/cookiecutter-django-docker.",
   "sentry_dsn": "https://XXX@YYY.ingest.sentry.io/ZZZ",

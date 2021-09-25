@@ -1,4 +1,4 @@
-{% raw %}
+{% raw -%}
 defaults:
   onFailure:
     report:
@@ -6,7 +6,7 @@ defaults:
         dsn:
           fromEnvVar: SENTRY_DSN
         fingerprint:  # optional, since yacron 0.6
-          - "{{ name }}"
+          - '{{ name }}'
   utc: false
   captureStdout: true
   captureStderr: true
@@ -16,6 +16,6 @@ defaults:
 jobs:
   - name: stuff
     schedule:
-      minute: "*/1"
+      minute: '*/5'
     command: django-admin stuff
-{% endraw %}
+{% endraw -%}
