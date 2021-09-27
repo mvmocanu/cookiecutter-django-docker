@@ -2,7 +2,7 @@ version: '{{ cookiecutter.docker_compose_version }}'
 
 services:
   nginx:
-    image: ${registry_host}/{{ cookiecutter.compose_project_name }}-nginx:${app_version}
+    image: ${registry_host}/${compose_project_name}-nginx:${app_version}
     build:
       context: ../..
       dockerfile: docker/python/Dockerfile
@@ -17,7 +17,7 @@ services:
   {%- set domain = None %}
 {%- endif %}
   {{ service }}:
-    image: ${registry_host}/{{ cookiecutter.compose_project_name }}-{{ service }}:${app_version}
+    image: ${registry_host}/${compose_project_name}-{{ service }}:${app_version}
     build:
       context: ../..
       dockerfile: docker/python/Dockerfile
@@ -31,6 +31,6 @@ services:
 {%- endif %}
 {%- endfor %}
   pg:
-    image: ${registry_host}/{{ cookiecutter.compose_project_name }}-pg:${app_version}
+    image: ${registry_host}/${compose_project_name}-pg:${app_version}
     build:
       context: ../../docker/postgres

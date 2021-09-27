@@ -2,7 +2,7 @@ version: '{{ cookiecutter.docker_compose_version }}'
 
 services:
   nginx:
-    image: ${registry_host}/{{ cookiecutter.compose_project_name }}-nginx:${app_version}
+    image: ${registry_host}/${compose_project_name}-nginx:${app_version}
     restart: unless-stopped
     ports: ['80:80', '443:443']
     volumes:
@@ -26,7 +26,7 @@ services:
   {%- set domain = None %}
 {%- endif %}
   {{ service }}:
-    image: ${registry_host}/{{ cookiecutter.compose_project_name }}-{{ service }}:${app_version}
+    image: ${registry_host}/${compose_project_name}-{{ service }}:${app_version}
     env_file:
       - /services/{{ service }}/.env
     restart: unless-stopped
@@ -51,7 +51,7 @@ services:
 {%- endif %}
 {%- endfor %}
   pg:
-    image: ${registry_host}/{{ cookiecutter.compose_project_name }}-pg:${app_version}
+    image: ${registry_host}/${compose_project_name}-pg:${app_version}
     restart: unless-stopped
     command: [
       'postgres',

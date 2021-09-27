@@ -10,6 +10,7 @@ defaults:
   utc: false
   captureStdout: true
   captureStderr: true
+  concurrencyPolicy: Forbid
   failsWhen:
     producesStdout: false
     producesStderr: false

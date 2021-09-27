@@ -26,12 +26,12 @@ while true; do
         echo -e "\033[1;36m[$(date -Iseconds)] Detected change in:\033[0m $event"
         if [[ $event =~ .*/static(/|$) ]]; then
             echo -e "\033[1;34m[$(date -Iseconds)] Running collectstatic ..."
-            docker exec {{ cookiecutter.compose_project_name }}_web_1 django-admin collectstatic --no-input -v0 || echo -e "\033[1;31m[$(date -Iseconds)] Failed to run collectstatic!"
+            docker exec ${COMPOSE_PROJECT_NAME}_web_1 django-admin collectstatic --no-input -v0 || echo -e "\033[1;31m[$(date -Iseconds)] Failed to run collectstatic!"
         else
             echo -e "\033[1;34m[$(date -Iseconds)] Attempting restarts ..."
             echo r > /var/app/run/uwsgi.fifo
             pids=()
-            for name in $(docker ps --format '{{ '{{ .Names }}' }}' | egrep '^{{ cookiecutter.compose_project_name }}_(celery|cron)'); do
+            for name in $(docker ps --format '{{ '{{ .Names }}' }}' | egrep "^${COMPOSE_PROJECT_NAME}prxc_(celery|cron)")); do
                 echo "+ docker restart $name"
                 docker restart $name &
                 pids+=($!)

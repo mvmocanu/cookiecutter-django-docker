@@ -11,7 +11,7 @@
         registry_host: '{{ registry_host }}'
     - name: start registry
       docker_compose:
-        project_name: {% endraw %}{{ cookiecutter.compose_project_name }}{% raw %}
+        project_name: '{{ compose_project_name }}'
         definition:
           version: '3.7'
           services:
@@ -23,11 +23,7 @@
                 - '{{ playbook_dir }}/../.home/registry:/var/lib/registry'
     - name: push image
       command:
-        cmd: docker push '{{ registry_host }}/{% endraw %}{{ cookiecutter.compose_project_name }}{% raw %}-{{ item }}:{{ app_version }}'
-      with_items:
-        - nginx
-        - '{{ services|list }}'
-        - pg
+        cmd: docker-compose -f {{ inventory_dir }}/docker-compose.build.yml push
 - hosts: all
   tasks:
     - name: copy release docker-compose.yml
@@ -85,17 +81,17 @@
         COMPOSE_FILE: '{{ compose_files.files | map(attribute="path") | join(":") }}'
       command:
         cmd: docker-compose kill -s HUP nginx
-{%- endraw %}
 - hosts: 127.0.0.1
   connection: local
   tasks:
     - name: shutdown registry
       tags: cleanup
       docker_compose:
-        project_name: {{ cookiecutter.compose_project_name }}
+        project_name: '{{ compose_project_name }}'
         state: absent
         definition:
           version: '3.7'
           services:
             registry:
               image: registry:2
+{%- endraw %}
