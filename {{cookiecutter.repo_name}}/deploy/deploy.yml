@@ -2,13 +2,6 @@
 - hosts: 127.0.0.1
   connection: local
   tasks:
-    - name: build image
-      command:
-        chdir: ..
-        cmd: docker-compose -f {{ inventory_dir }}/docker-compose.build.yml build
-      environment:
-        app_version: '{{ app_version }}'
-        registry_host: '{{ registry_host }}'
     - name: start registry
       docker_compose:
         project_name: '{{ compose_project_name }}'
@@ -21,25 +14,23 @@
                 - '{{ registry_port }}:5000'
               volumes:
                 - '{{ playbook_dir }}/../.home/registry:/var/lib/registry'
-    - name: push image
+    - name: publish image
       command:
-        cmd: docker-compose -f {{ inventory_dir }}/docker-compose.build.yml push
+        chdir: ..
+        cmd: docker-compose -f {{ inventory_dir }}/docker-compose.build.yml {{ item }}
+      environment:
+        app_version: '{{ app_version }}'
+        registry_host: '{{ registry_host }}'
+        compose_project_name: '{{ compose_project_name }}'
+      loop:
+        - build
+        - push
 - hosts: all
   tasks:
     - name: copy release docker-compose.yml
-      copy:
+      template:
         src: '{{ inventory_dir }}/docker-compose.release.yml'
         dest: '/services/{{ compose_file }}'
-    - name: patch ${app_version} in docker-compose.yml
-      replace:
-        dest: '/services/{{ compose_file }}'
-        regexp: '\$\{app_version}'
-        replace: '{{ app_version }}'
-    - name: patch ${registry_host} in docker-compose.yml
-      replace:
-        dest: '/services/{{ compose_file }}'
-        regexp: '\$\{registry_host}'
-        replace: '{{ registry_host }}'
     - name: get available compose files
       find:
         paths: /services
