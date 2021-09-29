@@ -4,16 +4,17 @@
   tasks:
     - name: start registry
       docker_compose:
-        project_name: '{{ compose_project_name }}'
+        project_name: registry
         definition:
           version: '3.7'
-          services:
-            registry:
-              image: registry:2
-              ports:
-                - '{{ registry_port }}:5000'
-              volumes:
-                - '{{ playbook_dir }}/../.home/registry:/var/lib/registry'
+          services: >
+            {
+              "{{ compose_project_name }}": {
+                "image": "registry:2",
+                "ports": ["{{ registry_port }}:5000"],
+                "volumes": ["{{ playbook_dir }}/../.home/registry:/var/lib/registry"]
+              }
+            }
     - name: publish image
       command:
         chdir: ..
@@ -78,11 +79,8 @@
     - name: shutdown registry
       tags: cleanup
       docker_compose:
-        project_name: '{{ compose_project_name }}'
-        state: absent
+        project_name: registry
         definition:
           version: '3.7'
-          services:
-            registry:
-              image: registry:2
+          services: '{"{{ compose_project_name }}": {"image": "registry:2"}}'
 {%- endraw %}
