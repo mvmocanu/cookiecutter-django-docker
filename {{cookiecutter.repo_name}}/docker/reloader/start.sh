@@ -31,7 +31,7 @@ while true; do
             echo -e "\033[1;34m[$(date -Iseconds)] Attempting restarts ..."
             echo r > /var/app/run/uwsgi.fifo
             pids=()
-            for name in $(docker ps --format '{{ '{{ .Names }}' }}' | egrep "^${COMPOSE_PROJECT_NAME}prxc_(celery|cron)")); do
+            for name in $(docker ps --format '{{ '{{ .Names }}' }}' | egrep "^${COMPOSE_PROJECT_NAME}_(celery|cron)")); do
                 echo "+ docker restart $name"
                 docker restart $name &
                 pids+=($!)
