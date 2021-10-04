@@ -27,7 +27,7 @@
           --webroot \
           --agree-tos \
           --preferred-challenges=http-01 \
-          --email={% endraw %}{{ cookiecutter.deploy_letencrypt_email }}{% raw %} \
+          --email={{ letencrypt_email }} \
           --webroot-path=/shared/{{ item }} \
           --domain={{ item }} \
           --non-interactive \
