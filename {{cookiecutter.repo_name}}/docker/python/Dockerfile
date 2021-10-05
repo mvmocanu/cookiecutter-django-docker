@@ -22,7 +22,7 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
 RUN bash -o pipefail -c "curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | \
     python - --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}"
 
-# This indents to be the sole Dockerfile for the project so allow building variants with different or no dependencies.
+# This intents to be the sole Dockerfile for the project so allow building variants with different or no dependencies.
 COPY requirements /requirements
 ARG REQUIREMENTS
 RUN --mount=type=cache,target=/root/.cache set -x \
