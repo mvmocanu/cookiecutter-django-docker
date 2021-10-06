@@ -1,5 +1,4 @@
-# An alternative dev configuration the the more simple devserver (easier to debug but you lose dev-prod parity)
-# Note: migrations are not run automatically!
+# An alternative dev configuration with the more simple devserver (easier to debug but you lose dev-prod parity)
 version: '{{ cookiecutter.docker_compose_version }}'
 
 services:
