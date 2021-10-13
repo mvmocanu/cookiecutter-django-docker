@@ -8,7 +8,7 @@
   "django_project_name": "{{ cookiecutter.name.lower().replace(' ','_').replace('-','_') }}_project",
   "compose_project_name": "{{ cookiecutter.name.lower().replace(' ','').replace('-','').replace('-','').replace('a', '').replace('e', '').replace('u', '').replace('i', '').replace('o', '').replace('a', '')[:4] }}",
   "django_app_name": "{{ cookiecutter.name.lower().replace(' ','_').replace('-','_') }}",
-  "deploy_letencrypt_email": "admin@example.com",
+  "deploy_letsencrypt_email": "admin@example.com",
   "deploy_services": "demo:demo.example.com celery cron",
   "deploy_ansible_host": "1.2.3.4",
   "deploy_ansible_port": "22",

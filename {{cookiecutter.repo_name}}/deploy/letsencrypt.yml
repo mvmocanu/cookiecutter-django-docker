@@ -27,7 +27,7 @@
           --webroot \
           --agree-tos \
           --preferred-challenges=http-01 \
-          --email={{ letencrypt_email }} \
+          --email={{ letsencrypt_email }} \
           --webroot-path=/shared/{{ item }} \
           --domain={{ item }} \
           --non-interactive \
