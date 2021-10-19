@@ -1,6 +1,6 @@
 #!/bin/bash -eu
-mkdir -p /var/app/run /var/app/static
-chown -R app:app /var/app
+mkdir -p /var/app/run /var/app/static /var/app/media /var/app/logs
+chown -R app:app /var/app || true
 # Fill in defaults if /etc/app is an empty volume
 for path in /etc/app-defaults/*; do
   name=$(basename "$path")
