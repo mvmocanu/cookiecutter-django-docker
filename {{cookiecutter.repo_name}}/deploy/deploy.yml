@@ -5,6 +5,7 @@
     - name: start registry
       docker_compose:
         project_name: registry
+        remove_orphans: yes
         definition:
           version: '3.7'
           services: >
@@ -80,6 +81,8 @@
       tags: cleanup
       docker_compose:
         project_name: registry
+        state: absent
+        remove_orphans: yes
         definition:
           version: '3.7'
           services: '{"{{ compose_project_name }}": {"image": "registry:2"}}'
