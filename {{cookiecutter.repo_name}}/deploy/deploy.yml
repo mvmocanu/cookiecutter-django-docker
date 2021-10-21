@@ -70,7 +70,7 @@
         docker-compose run --rm -T {{ item }} pysu app django-admin migrate --no-input 2>&1 | tee -a /services/{{ item }}/logs/migrations.log
         docker-compose run --rm -T {{ item }} pysu app django-admin collectstatic --noinput --clear -v0
       loop: '{{ services|list }}'
-    - name: reload nxing
+    - name: reload nginx
       environment:
         COMPOSE_FILE: '{{ compose_files.files | map(attribute="path") | join(":") }}'
       command:
