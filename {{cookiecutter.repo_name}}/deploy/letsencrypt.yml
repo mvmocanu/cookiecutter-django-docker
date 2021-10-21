@@ -15,7 +15,7 @@
         name: certbot_renew
         minute: '0'
         hour: '1'
-        job: docker-compose exec -T nginx certbot renew
+        job: docker-compose exec -T nginx certbot renew >> /services/nginx/logs/cron.log 2>&1
     - name: initial setup
       shell: |
         set -eu
