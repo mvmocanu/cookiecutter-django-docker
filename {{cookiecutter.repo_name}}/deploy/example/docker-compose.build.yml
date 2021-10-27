@@ -23,7 +23,7 @@ services:
       dockerfile: docker/python/Dockerfile
       args:
         REQUIREMENTS: base
-        DJANGO_SETTINGS_MODULE: evignetteas_project.settings
+        DJANGO_SETTINGS_MODULE: ${django_settings_module}
         USER_ID: {{ 2000 + loop.index }}
         GROUP_ID: {{ 2000 + loop.index }}
 {%- if domain %}

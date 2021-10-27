@@ -14,7 +14,7 @@ from pathlib import Path
 
 from django.utils.translation import gettext_lazy as _
 
-PROJECT_VERSION = '0.1.0'
+PROJECT_VERSION = '{{ cookiecutter.project_version }}'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,7 +40,6 @@ ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -48,7 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_celery_results',
     'django_extensions',
-    '{{cookiecutter.django_app_name}}.apps.{{ cookiecutter.django_app_name|replace('_', ' ')|title|replace(' ', '') }}Config',
+    '{{ cookiecutter.django_project_name }}.apps.CustomAdminConfig',
+    '{{ cookiecutter.django_app_name }}.apps.{{ cookiecutter.django_app_name|replace('_', ' ')|title|replace(' ', '') }}Config',
 ]
 
 MIDDLEWARE = [
