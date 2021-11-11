@@ -110,12 +110,6 @@ ARG SERVER_NAME="localhost"
 
 WORKDIR /app
 
-ARG DJANGO_COLLECTSTATIC
-RUN set -x \
- && if [ -n "$DJANGO_COLLECTSTATIC" ] \
-  ; then django-admin collectstatic --noinput --clear -v0 \
-  ; fi
-
 COPY docker/python/entrypoint.sh /
 COPY docker/python/uwsgi.ini /etc/app/
 COPY docker/python/nginx.conf /etc/app/
@@ -129,4 +123,11 @@ RUN envsubst < /tmp/nginx.site > /etc/app/nginx.site
 RUN cp /etc/app/fullchain.pem /etc/app/chain.pem \
  && ln -sf /etc/app/nginx.conf /etc/nginx/nginx.conf \
  && cp /etc/nginx/mime.types /etc/app \
+ && chmod -R go+r /etc/app \
  && cp -r /etc/app /etc/app-defaults
+
+ARG DJANGO_COLLECTSTATIC
+RUN set -x \
+ && if [ -n "$DJANGO_COLLECTSTATIC" ] \
+  ; then django-admin collectstatic --noinput --clear -v0 \
+  ; fi
