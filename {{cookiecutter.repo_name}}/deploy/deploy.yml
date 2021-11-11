@@ -51,8 +51,10 @@
         project_src: '/services'
         files: '{{ compose_files.files | map(attribute="path") | list }}'
     - name: ensure new users/databases
+      args:
+        executable: /bin/bash
       shell: |
-        set -eu
+        set -euxo pipefail
         echo "
         ####################################
             $(date)
@@ -61,8 +63,10 @@
     - name: run migrations
       environment:
         COMPOSE_FILE: '{{ compose_files.files | map(attribute="path") | join(":") }}'
+      args:
+        executable: /bin/bash
       shell: |
-        set -eu
+        set -euxo pipefail
         echo "
         ####################################
             $(date)
@@ -70,6 +74,9 @@
         docker-compose run --rm -T {{ item }} pysu app django-admin migrate --no-input 2>&1 | tee -a /services/{{ item }}/logs/migrations.log
         docker-compose run --rm -T {{ item }} pysu app django-admin collectstatic --noinput --clear -v0
       loop: '{{ services|list }}'
+      register: migration_result
+      failed_when:
+        - migration_result.rc != 0
     - name: reload nginx
       environment:
         COMPOSE_FILE: '{{ compose_files.files | map(attribute="path") | join(":") }}'

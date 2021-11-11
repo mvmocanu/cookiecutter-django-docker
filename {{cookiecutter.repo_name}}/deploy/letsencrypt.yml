@@ -6,7 +6,8 @@
         dest: /services/nginx/etc/renewal-hooks/deploy/run
         mode: 0777
         content: |
-          #!/bin/bash -eux
+          #!/bin/bash
+          set -euxo pipefail
           cp $RENEWED_LINEAGE/*.pem /shared/$RENEWED_DOMAINS/etc/
           ps fauxww
           kill -HUP 1
@@ -17,8 +18,10 @@
         hour: '1'
         job: docker-compose exec -T nginx certbot renew >> /services/nginx/logs/cron.log 2>&1
     - name: initial setup
+      args:
+        executable: /bin/bash
       shell: |
-        set -eu
+        set -euxo pipefail
         echo "
         ####################################
             $(date)
@@ -34,8 +37,10 @@
           --keep-until-expiring 2>&1 | tee -a /services/nginx/logs/setup.log
       loop: '{{ letsencrypt_domains|list }}'
     - name: manually copy certs
+      args:
+        executable: /bin/bash
       shell: |
-        set -eu
+        set -euxo pipefail
         docker-compose run --rm -T \
           -e 'RENEWED_LINEAGE=/etc/letsencrypt/live/{{ item }}' \
           -e 'RENEWED_DOMAINS={{ item }}' \

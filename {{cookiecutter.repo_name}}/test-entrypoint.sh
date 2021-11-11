@@ -1,4 +1,5 @@
-#!/bin/bash -eu
+#!/bin/bash
+set -euo pipefail
 
 if [[ -z "$@" ]]; then
     echo -e "\033[1;31mMust be given a command to run. This should not be possible as ./test.sh always passes something.\033[0m"

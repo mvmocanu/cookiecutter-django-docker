@@ -1,5 +1,5 @@
-#!/bin/bash -eux
-set -o pipefail
+#!/bin/bash
+set -euxo pipefail
 
 if [[ "$@" == "--help" || "$@" == "-h" ]]; then
   set +x

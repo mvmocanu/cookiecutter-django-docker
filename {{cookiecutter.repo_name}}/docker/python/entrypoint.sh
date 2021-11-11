@@ -1,4 +1,5 @@
-#!/bin/bash -eu
+#!/bin/bash
+set -euo pipefail
 mkdir -p /var/app/run /var/app/static /var/app/media /var/app/logs
 chown -R app:app /var/app || true
 # Fill in defaults if /etc/app is an empty volume

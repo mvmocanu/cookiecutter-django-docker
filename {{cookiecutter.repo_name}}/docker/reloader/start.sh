@@ -1,4 +1,5 @@
-#!/bin/bash -eu
+#!/bin/bash
+set -euo pipefail
 shopt -s extglob
 
 if [ -z "$RELOADER_MONITOR" ]; then

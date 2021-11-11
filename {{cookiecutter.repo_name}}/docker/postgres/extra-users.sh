@@ -1,4 +1,5 @@
-#!/bin/bash -eux
+#!/bin/bash
+set -euxo pipefail
 
 for extra in ${POSTGRES_EXTRAS:-}; do
     psql postgres <<-EOSQL
