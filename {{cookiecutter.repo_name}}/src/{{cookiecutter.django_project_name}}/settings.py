@@ -36,6 +36,14 @@ LOGGING_PATH = os.environ.get('LOGGING_PATH')
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
 
+EMAIL_HOST = os.environ.get('DJANGO_EMAIL_HOST')
+EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_HOST_PASSWORD')
+EMAIL_PORT = int(os.environ.get('DJANGO_EMAIL_PORT', 0))
+EMAIL_USE_TLS = os.environ.get('DJANGO_EMAIL_USE_TLS', '').lower() in ['yes', 'true', 'y', '1']
+EMAIL_BACKEND = os.environ.get('DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_FILE_PATH = os.environ.get('DJANGO_EMAIL_FILE_PATH')
+
 
 # Application definition
 
@@ -78,12 +86,18 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django_settings_export.settings_export',
             ],
         },
     }
 ]
 
-WSGI_APPLICATION = '{{ cookiecutter.django_project_name }}.wsgi.application'
+SETTINGS_EXPORT = [
+    'DEBUG',
+    'SERVER_NAME',
+]
+
+WSGI_APPLICATION = 'clinica9.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/stable/ref/settings/#databases
@@ -95,6 +109,7 @@ DATABASES = {
         'USER': os.environ.get('DJANGO_DB_USER'),
         'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD'),
         'HOST': os.environ.get('DJANGO_DB_HOST'),
+        'ATOMIC_REQUESTS': True,
     }
 }
 

@@ -11,6 +11,8 @@ pylibmc
 python-dateutil
 requests
 sentry-sdk
+django-admin-utils
+django-settings-export
 
 # container tooling
 holdup
