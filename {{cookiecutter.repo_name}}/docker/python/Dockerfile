@@ -23,7 +23,7 @@ RUN bash -o pipefail -c "curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | \
     python - --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}"
 
 # This intents to be the sole Dockerfile for the project so allow building variants with different or no dependencies.
-COPY requirements /requirements
+COPY requirements/*.txt /requirements/
 ARG REQUIREMENTS
 RUN --mount=type=cache,target=/root/.cache set -x \
  && mkdir /deps \
