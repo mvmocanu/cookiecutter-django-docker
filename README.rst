@@ -9,9 +9,7 @@ What is included?
 
 * Packages for Django_ project and an app
 * Setup for Celery_, Apache_, debug-toolbar etc
-* SSL setup for Apache (that's why it's used instead of uWSGI_).
-* Deployment Ansible_ playbooks [TODO]
-* Dockerized LetsEncrypt setup [TODO]
+* LetsEncrypt_ setup with Nginx_ and uWSGI_.
 * Setup for testing using Pytest_.
 * Reloader (container that restarts other containers when files change, for development).
 
@@ -109,3 +107,5 @@ Working with the project is the usual ``docker-compose up`` and such, nothing sp
 .. _uWSGI: https://uwsgi-docs.readthedocs.io/
 .. _Apache: https://httpd.apache.org/
 .. _Ansible: https://docs.ansible.com/ansible/latest/
+.. _LetsEncrypt: https://letsencrypt.org/
+.. _Nginx: nginx.org/
