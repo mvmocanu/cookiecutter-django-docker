@@ -97,7 +97,7 @@ SETTINGS_EXPORT = [
     'SERVER_NAME',
 ]
 
-WSGI_APPLICATION = 'clinica9.wsgi.application'
+WSGI_APPLICATION = '{{ cookiecutter.django_project_name }}.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/stable/ref/settings/#databases
