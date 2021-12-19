@@ -2,13 +2,13 @@
 set -euxo pipefail
 
 for extra in ${POSTGRES_EXTRAS:-}; do
-    psql postgres <<-EOSQL
+    psql --username "$POSTGRES_USER" --dbname "postgres" <<-EOSQL
         CREATE USER $extra WITH PASSWORD '$extra';
         CREATE DATABASE $extra;
         GRANT ALL PRIVILEGES ON DATABASE $extra TO $extra;
 EOSQL
     # Force a reassign in case something was misconfigured in the past
-    psql $extra <<-EOSQL
+    psql --username "$POSTGRES_USER" --dbname "$extra" <<-EOSQL
         DO \$\$
         DECLARE r record;
         BEGIN
