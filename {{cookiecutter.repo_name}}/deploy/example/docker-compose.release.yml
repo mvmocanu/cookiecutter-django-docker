@@ -3,7 +3,7 @@ version: '{{ cookiecutter.docker_compose_version }}'
 services:
   nginx:
     image: {% raw %}{{ registry_host }}/{{ compose_project_name }}-nginx:{{ app_version }}{% endraw %}
-    restart: unless-stopped
+    restart: always
     ports: ['80:80', '443:443']
     volumes:
       - /services/nginx/etc:/etc/letsencrypt
