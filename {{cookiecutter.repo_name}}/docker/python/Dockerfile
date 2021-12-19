@@ -25,6 +25,7 @@ RUN bash -o pipefail -c "curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | \
 # This intents to be the sole Dockerfile for the project so allow building variants with different or no dependencies.
 COPY requirements/*.txt /requirements/
 ARG REQUIREMENTS
+ARG CPUCOUNT=1
 RUN --mount=type=cache,target=/root/.cache set -x \
  && mkdir /deps \
  && if [ -n "$REQUIREMENTS" ] \
