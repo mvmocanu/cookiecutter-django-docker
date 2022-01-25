@@ -11,6 +11,11 @@
           cp $RENEWED_LINEAGE/*.pem /shared/$RENEWED_DOMAINS/etc/
           ps fauxww
           kill -HUP 1
+    - name: fix cron PATH
+      cron:
+        env: true
+        name: PATH
+        job: '{{ ansible_env.PATH }}'
     - name: install renewal cron job
       cron:
         name: certbot_renew
