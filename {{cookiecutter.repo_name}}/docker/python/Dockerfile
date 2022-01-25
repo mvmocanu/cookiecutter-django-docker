@@ -66,13 +66,13 @@ RUN apt-get update \
         graphviz \
         dumb-init \
         libpq5={{ cookiecutter.postgresql_version.split('.')|first }}.* postgresql-client-{{ cookiecutter.postgresql_version.split('.')|first }} \
-        python3-dbg python3-distutils-extra \
+        python3-dbg python3-distutils python3-distutils-extra \
         libmemcached11 \
         sudo ca-certificates \
         nginx \
         gdal-bin python3-gdal
 # Avoid having to use python3 all over the place.
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 # Adds a new user named python and add it to the list of sudoers. Will be able to call sudo without the password.
 # This is more geared to development (eg: match user's UID) than production (where you shouln't need any sudo/home).
@@ -94,7 +94,8 @@ RUN --mount=type=bind,from=deps,src=/deps,target=/deps set -x \
 RUN mkdir -p /app /var/app/logs /var/app/static /etc/app \
  && chown -R app:app /app
 
-RUN echo /app/src > $(python -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())')/app.pth
+ENV PYTHONPATH=/app/src
+RUN echo /app/src > $(SETUPTOOLS_USE_DISTUTILS=false python -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())')/app.pth
 
 RUN ln -sf /proc/self/fd/2 /var/app/logs/httpd_error.log \
  && ln -sf /proc/self/fd/1 /var/app/logs/httpd_access.log
