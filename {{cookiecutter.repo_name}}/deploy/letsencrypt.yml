@@ -30,7 +30,7 @@
         echo "
         ####################################
             $(date)
-        ####################################" >> /services/nginx/logs/certbot.log
+        ####################################" >> /services/nginx/logs/setup.log
         docker-compose run --rm -T nginx certbot certonly \
           --webroot \
           --agree-tos \
@@ -49,7 +49,7 @@
         docker-compose run --rm -T \
           -e 'RENEWED_LINEAGE=/etc/letsencrypt/live/{{ item }}' \
           -e 'RENEWED_DOMAINS={{ item }}' \
-          nginx /etc/letsencrypt/renewal-hooks/deploy/run
+          nginx /etc/letsencrypt/renewal-hooks/deploy/run >> /services/nginx/logs/setup.log
       loop: '{{ letsencrypt_domains|list }}'
     - name: reload nginx
       command:
