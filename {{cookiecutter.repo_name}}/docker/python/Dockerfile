@@ -97,8 +97,8 @@ RUN mkdir -p /app /var/app/logs /var/app/static /etc/app \
 ENV PYTHONPATH=/app/src
 RUN echo /app/src > $(SETUPTOOLS_USE_DISTUTILS=false python -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())')/app.pth
 
-RUN ln -sf /proc/self/fd/2 /var/app/logs/httpd_error.log \
- && ln -sf /proc/self/fd/1 /var/app/logs/httpd_access.log
+RUN ln -sf /proc/self/fd/2 /var/app/logs/error.log \
+ && ln -sf /proc/self/fd/1 /var/app/logs/access.log
 
 COPY src /app/src
 
