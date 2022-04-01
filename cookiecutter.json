@@ -17,12 +17,12 @@
   "sentry_dsn": "https://XXX@YYY.ingest.sentry.io/ZZZ",
   "timezone": "Europe/Bucharest",
   "project_version": "0.1.0",
-  "dockerfile_version": "1.2.1",
-  "pip_version": "21.3",
-  "setuptools_version": "58.2.0",
+  "dockerfile_version": "1",
+  "pip_version": "22.0.3",
+  "setuptools_version": "60.9.3",
   "docker_compose_version": "3.7",
-  "postgresql_version": "13.4",
-  "redis_version": "6.2.5",
-  "memcached_version": "1.6.10",
+  "postgresql_version": "13.6",
+  "redis_version": "6.2.6",
+  "memcached_version": "1.6.14",
   "ubuntu_version": "20.04"
 }
