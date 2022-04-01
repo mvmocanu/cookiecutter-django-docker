@@ -17,6 +17,7 @@ node_modules
 # editors
 *.sw*
 .idea
+.vscode
 *.sublime-*
 *.bak
 
