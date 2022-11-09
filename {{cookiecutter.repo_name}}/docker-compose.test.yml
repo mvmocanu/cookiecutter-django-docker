@@ -1,6 +1,14 @@
 version: '{{ cookiecutter.docker_compose_version }}'
 
 services:
+  requirements:
+    build:
+      context: docker/requirements
+    volumes:
+      - $PWD/requirements:/requirements
+    entrypoint: /entrypoint.sh
+    env_file:
+      - .env-test
   test:
     build:
       context: .
@@ -27,13 +35,19 @@ services:
       - $PWD:/app
       - $PWD/.home:/home/app
   pg:
+    build:
+      context: docker/postgres
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
     command: [
-        'postgres',
-        '-c', 'log_statement=all',
-        '-c', 'log_duration=true',
-        '-c', 'log_disconnections=true',
-        '-c', 'log_connections=true',
-        '-c', 'log_lock_waits=true',
-        '-c', 'log_min_error_statement=WARNING',
-        '-c', 'log_min_duration_statement=1s',
+      'postgres',
+      '-c', 'log_statement=all',
+      '-c', 'log_duration=true',
+      '-c', 'log_disconnections=true',
+      '-c', 'log_connections=true',
+      '-c', 'log_lock_waits=true',
+      '-c', 'log_min_error_statement=WARNING',
+      '-c', 'log_min_duration_statement=1s',
     ]

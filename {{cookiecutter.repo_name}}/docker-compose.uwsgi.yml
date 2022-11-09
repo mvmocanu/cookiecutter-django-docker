@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  pg:
+    ports:
+      - '5432:5432'
+  web:
+    environment:
+      DJANGO_DB_MIGRATE: x
+      DJANGO_COLLECTSTATIC: x
+    ports:
+      - '80:8000'
+    command: [
+      'uwsgi',
+      '--ini', '/etc/app/uwsgi.ini',
+      '--processes', '4',
+      '--show-config',
+    ]
+    depends_on:
+      - pg
+    stop_signal: SIGTERM
+    tty: yes

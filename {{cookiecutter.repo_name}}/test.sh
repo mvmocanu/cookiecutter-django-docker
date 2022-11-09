@@ -24,6 +24,10 @@ Examples:
 
     ./test.sh bash
 
+- update the requirements (also automatically run if you don't have any requirements/*.txt):
+
+    ./test.sh requirements
+
 - disable building:
 
     NOBUILD=1 ./test.sh
@@ -35,9 +39,8 @@ Examples:
   exit 0
 fi
 
-PROJECT_NAME=$(grep COMPOSE_PROJECT_NAME .env | cut -d= -f2 || basename $PWD | sed -r 's/(\w)\w*($|\W+)/\1/g')
-export COMPOSE_PROJECT_NAME="${PROJECT_NAME}test"
-export COMPOSE_FILE=docker-compose.yml:docker-compose.test.yml
+export COMPOSE_PROJECT_NAME="test{{ cookiecutter.compose_project_name }}"
+export COMPOSE_FILE=docker-compose.test.yml
 
 USER="${USER:-$(id -nu)}"
 if [[ "$(uname)" == "Darwin" ]]; then
@@ -48,11 +51,15 @@ else
   USER_GID="$(id --group "$USER")"
 fi
 
+if [[ -z "$(find requirements -maxdepth 1 -name '*.txt' -print -quit)" ]] || [[ "$*" == "requirements" ]]; then
+  set -x
+  docker compose build --build-arg "USER_UID=$USER_UID" --build-arg "USER_GID=$USER_GID" requirements
+  docker compose run --rm --user=$USER_UID requirements
+  set +x
+fi
+
 if [[ -z "${NOBUILD:-}" ]]; then
-  docker-compose build \
-    --build-arg "USER_UID=$USER_UID" \
-    --build-arg "USER_GID=$USER_GID" \
-    test
+  docker compose build --build-arg "USER_UID=$USER_UID" --build-arg "USER_GID=$USER_GID" test
 fi
 if [[ -z "$*" ]]; then
   set -- pytest
@@ -66,14 +73,14 @@ fi
 
 function cleanup() {
   echo "Cleaning up ..."
-  docker-compose down && docker-compose rm -fv
+  docker compose down && docker compose rm -fv
 }
 if [[ -n "${NODEPS:-}" ]]; then
-  exec docker-compose run -e NODEPS=yes --no-deps --rm --user=$USER_UID test "$@"
+  exec docker compose run -e NODEPS=yes --no-deps --rm --user=$USER_UID test "$@"
 else
   if [[ -z "${NOCLEAN:-}" ]]; then
     trap cleanup EXIT
     cleanup || echo "Already clean :-)"
   fi
-  docker-compose run --rm --user=$USER_UID test "$@"
+  docker compose run --rm --user=$USER_UID test "$@"
 fi
