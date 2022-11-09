@@ -59,7 +59,7 @@ if __name__ == "__main__":
         subprocess.check_call(['git', 'init'])
 
 {%- if cookiecutter.worker != "rq" %}
-    os.unlink(join('docker', 'python', 'Fworker.ini'))
+    os.unlink(join('docker', 'python', 'worker.ini'))
 {%- endif %}
 {%- if cookiecutter.worker != "celery" %}
     os.unlink(join('src', '{{ cookiecutter.django_project_name }}', 'celery.py'))
