@@ -18,11 +18,12 @@
   "timezone": "Europe/Bucharest",
   "project_version": "0.1.0",
   "dockerfile_version": "1",
-  "pip_version": "22.0.3",
-  "setuptools_version": "60.9.3",
+  "pip_version": "22.3.1",
+  "setuptools_version": "65.5.1",
   "docker_compose_version": "3.7",
-  "postgresql_version": "13.6",
-  "redis_version": "6.2.6",
-  "memcached_version": "1.6.14",
-  "ubuntu_version": "20.04"
+  "postgresql_version": "15",
+  "redis_version": "7",
+  "memcached_version": "1",
+  "ubuntu_version": "22.04",
+  "ubuntu_release": "jammy"
 }
