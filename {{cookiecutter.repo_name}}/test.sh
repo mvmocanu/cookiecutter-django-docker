@@ -55,6 +55,9 @@ if [[ -z "$(find requirements -maxdepth 1 -name '*.txt' -print -quit)" ]] || [[ 
   set -x
   docker compose build --build-arg "USER_UID=$USER_UID" --build-arg "USER_GID=$USER_GID" requirements
   docker compose run --rm --user=$USER_UID requirements
+  if [[ "$*" == "requirements" ]]; then
+    exit
+  fi
   set +x
 fi
 

@@ -63,8 +63,8 @@ services:
       - mc
       - redis
     entrypoint: [ '/entrypoint.sh' ]
+{%- if cookiecutter.worker == "celery" %}
 
-{% if cookiecutter.worker == "celery" %}
   worker:
     <<: *python
     entrypoint: [ '/entrypoint.sh' ]
@@ -72,7 +72,8 @@ services:
     depends_on:
       - pg
       - redis
-{% elif cookiecutter.worker == "rq" %}
+{%- elif cookiecutter.worker == "rq" %}
+
   worker:
     <<: *python
     entrypoint: [ '/entrypoint.sh' ]
@@ -82,4 +83,4 @@ services:
       - redis
     deploy:
       replicas: 2
-{% endif %}
+{%- endif %}

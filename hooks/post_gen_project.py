@@ -12,7 +12,7 @@ except ImportError:
 else:
     def warn(text):
         for line in text.splitlines():
-            secho(line, fg="white", bg="red", bold=True)
+            secho(line, fg="magenta", bold=True)
 
 
     def note(text):
@@ -49,16 +49,8 @@ if __name__ == "__main__":
     See .cookiecutterrc for instructions on regenerating the project.
 
 """)
-    secret_key = ''.join(
-        random.SystemRandom().choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)')
-        for i in range(50)
-    )
-    replace_content('.env-linux-osx', '<SECRET_KEY>', secret_key)
-    replace_content('.env-windows', '<SECRET_KEY>', secret_key)
     if os.name == 'nt':
-        replace_content('.env-windows', '<CHECKOUT_PATH>', os.getcwd())
-    else:
-        replace_content('.env-windows', '<CHECKOUT_PATH>', r'd:\projects\{{ cookiecutter.repo_name }}')
+        replace_content('.env-windows', 'd:\projects\{{ cookiecutter.repo_name }}', os.getcwd())
     if not glob.glob('requirements/*.txt'):
         warn('+ ./test.sh requirements')
         subprocess.check_call(['./test.sh', 'requirements'])
@@ -67,18 +59,22 @@ if __name__ == "__main__":
         subprocess.check_call(['git', 'init'])
 
 {%- if cookiecutter.worker != "rq" %}
-    os.unlink(join('docker', 'python', 'worker.ini'))
+    os.unlink(join('docker', 'python', 'Fworker.ini'))
 {%- endif %}
 {%- if cookiecutter.worker != "celery" %}
     os.unlink(join('src', '{{ cookiecutter.django_project_name }}', 'celery.py'))
 {%- endif %}
 
     if not os.path.exists('.env'):
-        warn('+ cp .env-linux-osx .env')
+        warn("You don't have an .env file yet. The default linux one is being copied for you...")
+        note('+ cp .env-linux-osx .env')
         shutil.copy('.env-linux-osx', '.env')
 
-    note('+ docker lock generate')
-    subprocess.check_call(['docker', 'lock', 'generate'])
+    if not os.path.exists('docker-lock.json'):
+        warn("You don't have an docker-lock.json yet. Generating it now...")
+        note('+ docker lock generate')
+        subprocess.check_call(['docker', 'lock', 'generate'])
+
     note('+ docker lock rewrite --tempdir .')
     subprocess.check_call(['docker', 'lock', 'rewrite', '--tempdir', '.'])
 
@@ -86,17 +82,16 @@ if __name__ == "__main__":
     subprocess.check_call(['pre-commit', 'autoupdate'])
     note('+ pre-commit install --install-hooks')
     subprocess.check_call(['pre-commit', 'install', '--install-hooks'])
-    if os.path.exists('.env'):
-        note('+ docker-compose build')
-        subprocess.check_call(['docker-compose', 'build'])
-    else:
-        warn("You don't have an .env file yet. Skipping docker-compose build")
-    print("""
+
+    warn("""
 ################################################################################
 
-    To get started make a copy of the appropriate platform .env file:
+    The project is ready!
 
         cd {{ cookiecutter.repo_name }}
+
+    To get started make sure you have the appropriate platform .env file:
+
         cp .env-linux-osx .env
           or
         cp .env-windows .env

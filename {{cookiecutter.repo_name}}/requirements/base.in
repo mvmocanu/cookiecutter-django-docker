@@ -2,17 +2,20 @@ django
 
 # bare minimum stuff
 attrs
+django-admin-utils
 django-crispy-forms
 django-pylibmc
+django-settings-export
 lazy_object_proxy
---no-binary=psycopg2
-psycopg2
-pylibmc
 python-dateutil
 requests
 sentry-sdk
-django-admin-utils
-django-settings-export
+tzdata
+
+# connectors
+--no-binary=psycopg2
+psycopg2
+pylibmc
 
 # container tooling
 holdup
