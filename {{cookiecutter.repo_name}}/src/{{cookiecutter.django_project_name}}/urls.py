@@ -20,7 +20,11 @@ from django.urls import path
 
 urlpatterns = [
     path('', include('{{ cookiecutter.django_app_name }}.urls')),
+{%- if cookiecutter.worker == "rq" %}
+    path('admin/rq/', include('django_rq.urls')),
+{%- endif %}
     path('admin/', admin.site.urls),
+
 ]
 
 if settings.DEBUG:

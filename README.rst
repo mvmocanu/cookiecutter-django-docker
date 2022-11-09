@@ -8,7 +8,7 @@ Continuation of `evozon/django-docker <https://github.com/evozon/django-docker>`
 What is included?
 
 * Packages for Django_ project and an app
-* Setup for Celery_, Apache_, debug-toolbar etc
+* Setup for Celery_ or RQ_, Apache_, debug-toolbar etc
 * LetsEncrypt_ setup with Nginx_ and uWSGI_.
 * Setup for testing using Pytest_.
 * Reloader (container that restarts other containers when files change, for development).
@@ -104,6 +104,7 @@ Working with the project is the usual ``docker-compose up`` and such, nothing sp
 .. _Docker: https://www.docker.com/
 .. _Django: https://www.djangoproject.com/
 .. _Celery: http://www.celeryproject.org/
+.. _RQ: https://python-rq.org/
 .. _uWSGI: https://uwsgi-docs.readthedocs.io/
 .. _Apache: https://httpd.apache.org/
 .. _Ansible: https://docs.ansible.com/ansible/latest/

@@ -14,6 +14,8 @@ from pathlib import Path
 
 from django.utils.translation import gettext_lazy as _
 
+from . import env
+
 PROJECT_VERSION = '{{ cookiecutter.project_version }}'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,26 +25,35 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/stable/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+SECRET_KEY = env.str('DJANGO_SECRET_KEY')
 
-SERVER_NAME = os.environ['SERVER_NAME']
+SERVER_NAME = env.str('SERVER_NAME')
+SERVER_PROTOCOL = env.str('SERVER_PROTOCOL', 'https')
+SERVER_PREFIX = f'{SERVER_PROTOCOL}://{SERVER_NAME}'
+SITE_NAME = env.str('SITE_NAME', SERVER_NAME)
+SITE_ID = 1
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', '').lower() in ['yes', 'true', 'y', '1']
-DEBUG_SQL = os.environ.get('DJANGO_DEBUG_SQL', '').lower() in ['yes', 'true', 'y', '1']
-DEBUG_SQL_LIMIT = int(os.environ.get('DJANGO_DEBUG_SQL_LIMIT', 5) or 5)
-DEBUG_TOOLBAR = os.environ.get('DJANGO_DEBUG_TOOLBAR', '').lower() in ['yes', 'true', 'y', '1']
-LOGGING_PATH = os.environ.get('LOGGING_PATH')
+DEBUG = env.bool('DJANGO_DEBUG', False)
+DEBUG_SQL = env.bool('DJANGO_DEBUG_SQL', False)
+DEBUG_SQL_LIMIT = env.int('DJANGO_DEBUG_SQL_LIMIT', 5) or 5
+DEBUG_TOOLBAR = env.bool('DJANGO_DEBUG_TOOLBAR', False)
+LOGGING_PATH = env.get('LOGGING_PATH')
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
 
-EMAIL_HOST = os.environ.get('DJANGO_EMAIL_HOST')
-EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_HOST_PASSWORD')
-EMAIL_PORT = int(os.environ.get('DJANGO_EMAIL_PORT', 0))
-EMAIL_USE_TLS = os.environ.get('DJANGO_EMAIL_USE_TLS', '').lower() in ['yes', 'true', 'y', '1']
-EMAIL_BACKEND = os.environ.get('DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
-EMAIL_FILE_PATH = os.environ.get('DJANGO_EMAIL_FILE_PATH')
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS')
+ADMINS = [(email, email) for email in env.list('DJANGO_ADMINS')]
+
+EMAIL_HOST = env.get('DJANGO_EMAIL_HOST')
+EMAIL_HOST_USER = env.get('DJANGO_EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env.get('DJANGO_EMAIL_HOST_PASSWORD')
+EMAIL_PORT = env.int('DJANGO_EMAIL_PORT', 0)
+EMAIL_USE_TLS = env.bool('DJANGO_EMAIL_USE_TLS', None)
+EMAIL_USE_SSL = env.bool('DJANGO_EMAIL_USE_SSL', None)
+EMAIL_BACKEND = env.str('DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_FILE_PATH = env.get('DJANGO_EMAIL_FILE_PATH')
+
+DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL')
 
 
 # Application definition
@@ -53,7 +64,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+{%- if cookiecutter.worker == 'rq' %}
+    'django_rq',
+{%- elif cookiecutter.worker == 'celery' %}
     'django_celery_results',
+{%- endif %}
     'django_extensions',
     '{{ cookiecutter.django_project_name }}.apps.CustomAdminConfig',
     '{{ cookiecutter.django_app_name }}.apps.{{ cookiecutter.django_app_name|replace('_', ' ')|title|replace(' ', '') }}Config',
@@ -70,7 +85,7 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
 ]
 
-ROOT_URLCONF = os.environ.get('DJANGO_ROOT_URLCONF', '{{ cookiecutter.django_project_name }}.urls')
+ROOT_URLCONF = env.str('DJANGO_ROOT_URLCONF', '{{ cookiecutter.django_project_name }}.urls')
 
 TEMPLATES = [
     {
@@ -95,6 +110,10 @@ TEMPLATES = [
 SETTINGS_EXPORT = [
     'DEBUG',
     'SERVER_NAME',
+    'SERVER_PROTOCOL',
+    'SERVER_PREFIX',
+    'SITE_NAME',
+    'PROJECT_VERSION',
 ]
 
 WSGI_APPLICATION = '{{ cookiecutter.django_project_name }}.wsgi.application'
@@ -105,22 +124,22 @@ WSGI_APPLICATION = '{{ cookiecutter.django_project_name }}.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DJANGO_DB_NAME'),
-        'USER': os.environ.get('DJANGO_DB_USER'),
-        'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD'),
-        'HOST': os.environ.get('DJANGO_DB_HOST'),
+        'NAME': env.get('DJANGO_DB_NAME'),
+        'USER': env.get('DJANGO_DB_USER'),
+        'PASSWORD': env.get('DJANGO_DB_PASSWORD'),
+        'HOST': env.get('DJANGO_DB_HOST'),
         'ATOMIC_REQUESTS': True,
     }
 }
 
 CACHES = {
     'default': {
-        'BACKEND': os.environ.get(
+        'BACKEND': env.str(
             'DJANGO_CACHE_BACKEND',
             'django.core.cache.backends.dummy.DummyCache' if DEBUG else 'django.core.cache.backends.locmem.LocMemCache',
         ),
-        'LOCATION': os.environ.get('DJANGO_CACHE_LOCATION'),
-        'KEY_PREFIX': os.environ.get('DJANGO_CACHE_KEY_PREFIX'),
+        'LOCATION': env.get('DJANGO_CACHE_LOCATION'),
+        'KEY_PREFIX': env.get('DJANGO_CACHE_KEY_PREFIX'),
     }
 }
 
@@ -155,7 +174,7 @@ LOCALE_PATHS = [
     '/app/src/locale',
 ]
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = '{{ cookiecutter.timezone }}'
 
 USE_I18N = True
 
@@ -174,14 +193,38 @@ STATICFILES_DIRS = [
 
 MEDIA_ROOT = '/var/app/media/'
 
+MEDIA_URL = 'media/'
+
+X_FRAME_OPTIONS = 'ORIGIN'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/stable/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CELERY_RESULT_BACKEND = 'django-db'
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
+CELERY_BROKER_URL = env.get('CELERY_BROKER_URL')
 CELERY_BROKER_TRANSPORT_OPTIONS = {'max_retries': 1}
+
+
+REDIS_HOST = env.host("REDIS")
+REDIS_PORT = env.port("REDIS", 6379)
+REDIS_DB = env.int("REDIS_DB", 0)
+REDIS_WORKER_DB = env.int("REDIS_WORKER_DB", 1)
+REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
+REDIS_SOCKET_TIMEOUT = env.int("REDIS_SOCKET_TIMEOUT", 10)
+
+RQ_QUEUES = {
+    "default": {
+        "HOST": REDIS_HOST,
+        "PORT": REDIS_PORT,
+        "DB": env.int("REDIS_WORKER_DB", 1),
+        "PASSWORD": REDIS_PASSWORD,
+        "SOCKET_TIMEOUT": REDIS_SOCKET_TIMEOUT,
+        "DEFAULT_TIMEOUT": 24 * 60 * 60,  # 24h - allow long-running tasks
+    },
+}
+
 
 LOGGING = {
     'version': 1,
@@ -230,7 +273,7 @@ LOGGING = {
 
 
 # Advanced debug settings
-SENTRY_DSN = os.environ.get('SENTRY_DSN')
+SENTRY_DSN = env.get('SENTRY_DSN')
 if SENTRY_DSN:
     import logging
 
@@ -284,7 +327,7 @@ if DEBUG_SQL:
                     )
                     record.args = ()
                 else:
-                    record.msg += f"\n \33[1;32m-- stack: \n{stack}\33[0m"
+                    record.msg += f'\n \33[1;32m-- stack: \n{stack}\33[0m'
 
                 record.stack_patched = True
             return True
@@ -293,7 +336,7 @@ if DEBUG_SQL:
     LOGGING['loggers']['django.db.backends']['filters'] = ['add_stack']
     LOGGING['filters']['add_stack'] = {
         '()': WithStacktrace,
-        'skip': ("django.db", "south.", "__main__"),
+        'skip': ('django.db', 'south.', '__main__'),
         'limit': DEBUG_SQL_LIMIT,
     }
 

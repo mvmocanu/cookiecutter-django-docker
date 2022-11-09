@@ -1,9 +1,8 @@
-import datetime
+import glob
 import os
 import random
 import shutil
 import subprocess
-import sys
 from os.path import join
 
 try:
@@ -60,18 +59,29 @@ if __name__ == "__main__":
         replace_content('.env-windows', '<CHECKOUT_PATH>', os.getcwd())
     else:
         replace_content('.env-windows', '<CHECKOUT_PATH>', r'd:\projects\{{ cookiecutter.repo_name }}')
-    if not os.path.exists('requirements/base.txt'):
-        note('+ pip-compile --upgrade requirements/base.in')
-        subprocess.check_call(['pip-compile', '--upgrade', 'requirements/base.in'])
-    if not os.path.exists('requirements/test.txt'):
-        note('+ pip-compile --upgrade requirements/test.in')
-        subprocess.check_call(['pip-compile', '--upgrade', 'requirements/test.in'])
-    if not os.path.exists('requirements/nginx.txt'):
-        note('+ pip-compile --upgrade requirements/nginx.in')
-        subprocess.check_call(['pip-compile', '--upgrade', 'requirements/nginx.in'])
+    if not glob.glob('requirements/*.txt'):
+        warn('+ ./test.sh requirements')
+        subprocess.check_call(['./test.sh', 'requirements'])
     if not os.path.exists('.git'):
         warn('+ git init')
         subprocess.check_call(['git', 'init'])
+
+{%- if cookiecutter.worker != "rq" %}
+    os.unlink(join('docker', 'python', 'worker.ini'))
+{%- endif %}
+{%- if cookiecutter.worker != "celery" %}
+    os.unlink(join('src', '{{ cookiecutter.django_project_name }}', 'celery.py'))
+{%- endif %}
+
+    if not os.path.exists('.env'):
+        warn('+ cp .env-linux-osx .env')
+        shutil.copy('.env-linux-osx', '.env')
+
+    note('+ docker lock generate')
+    subprocess.check_call(['docker', 'lock', 'generate'])
+    note('+ docker lock rewrite --tempdir .')
+    subprocess.check_call(['docker', 'lock', 'rewrite', '--tempdir', '.'])
+
     note('+ pre-commit autoupdate')
     subprocess.check_call(['pre-commit', 'autoupdate'])
     note('+ pre-commit install --install-hooks')

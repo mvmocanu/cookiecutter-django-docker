@@ -1,5 +1,11 @@
+{%- if cookiecutter.worker == 'rq' %}
+from django_rq import job
+
+@job
+{%- else %}
 from {{ cookiecutter.django_project_name }}.celery import app
 
-# Create your Celery tasks here, eg:
-# @app.task
-# def ...
+@app.task
+{%- endif %}
+def task():
+    raise NotImplementedError

@@ -64,10 +64,22 @@ services:
       - redis
     entrypoint: [ '/entrypoint.sh' ]
 
-  celery:
+{% if cookiecutter.worker == "celery" %}
+  worker:
     <<: *python
     entrypoint: [ '/entrypoint.sh' ]
     command: [ 'pysu', 'app', 'celery', '-A', '{{ cookiecutter.django_project_name }}', 'worker' ]
     depends_on:
       - pg
       - redis
+{% elif cookiecutter.worker == "rq" %}
+  worker:
+    <<: *python
+    entrypoint: [ '/entrypoint.sh' ]
+    command: [ 'pysu', 'app', 'django-admin', 'rqworker' ]
+    depends_on:
+      - pg
+      - redis
+    deploy:
+      replicas: 2
+{% endif %}

@@ -42,9 +42,15 @@ prompt_toolkit
 yacron
 ruamel.yaml
 
-# celery
+{%- if cookiecutter.worker == 'rq' %}
+# rq worker
+rq
+django-rq
+{%- elif cookiecutter.worker == 'celery' %}
+# celery worker
 celery[redis]
 django-celery-results
+{%- endif %}
 
 uwsgi
 django-uwsgi
