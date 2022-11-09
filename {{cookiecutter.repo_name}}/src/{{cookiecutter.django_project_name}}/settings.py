@@ -208,7 +208,7 @@ REDIS_DB = env.int("REDIS_DB", 0)
 REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
 REDIS_SOCKET_TIMEOUT = env.int("REDIS_SOCKET_TIMEOUT", 10)
 
-{%- if cookiecutter.worker == 'rq' %}
+{% if cookiecutter.worker == 'rq' -%}
 RQ_QUEUES = {
     "default": {
         "HOST": REDIS_HOST,
@@ -219,15 +219,15 @@ RQ_QUEUES = {
         "DEFAULT_TIMEOUT": 24 * 60 * 60,  # 24h - allow long-running tasks
     },
 }
-{%- elif cookiecutter.worker == 'celery' %}
+{% elif cookiecutter.worker == 'celery' -%}
 CELERY_RESULT_BACKEND = 'django-db'
-CELERY_BROKER_URL = f'redis://{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
+CELERY_BROKER_URL = f'redis://{f"{REDIS_PASSWORD}@" if REDIS_PASSWORD else ""}{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
 CELERY_BROKER_TRANSPORT_OPTIONS = {
     'max_retries': 1,
     'broker_connection_timeout': REDIS_SOCKET_TIMEOUT,
     'visibility_timeout': 24 * 60 * 60,  # 24h - allow long-running tasks
 }
-{%- endif %}
+{% endif -%}
 
 LOGGING = {
     'version': 1,
