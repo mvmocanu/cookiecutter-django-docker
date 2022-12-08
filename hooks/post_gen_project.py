@@ -72,11 +72,10 @@ if __name__ == "__main__":
 
     if not os.path.exists('docker-lock.json'):
         warn("You don't have an docker-lock.json yet. Generating it now...")
-        note('+ docker lock generate')
-        subprocess.check_call(['docker', 'lock', 'generate'])
-
-    note('+ docker lock rewrite --tempdir .')
-    subprocess.check_call(['docker', 'lock', 'rewrite', '--tempdir', '.'])
+        note('+ docker lock generate --update-existing-digests')
+        subprocess.check_call(['docker', 'lock', 'generate', '--update-existing-digests'])
+        note('+ docker lock rewrite --tempdir .')
+        subprocess.check_call(['docker', 'lock', 'rewrite', '--tempdir', '.'])
 
     note('+ pre-commit autoupdate')
     subprocess.check_call(['pre-commit', 'autoupdate'])
