@@ -15,7 +15,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_rel
         libgdal-dev \
         libtiff-dev libjpeg-dev libzip-dev libfreetype-dev \
         libwebp-dev tcl-dev tk-dev libffi-dev \
-        libmemcached-dev zlib1g-dev \
+        libmemcached-dev zlib1g-dev libpcre3-dev \
         build-essential git sudo ca-certificates
 
 RUN bash -o pipefail -c "curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | \
@@ -59,15 +59,15 @@ RUN apt-get update \
  && curl -fsSL11 'https://www.postgresql.org/media/keys/ACCC4CF8.asc' | apt-key add - \
  && apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        strace gdb lsof locate net-tools htop iputils-ping dnsutils \
+        strace ltrace gdb lsof locate net-tools htop iputils-ping dnsutils \
         nano vim tree less telnet \
-        socat \
+        socat byobu \
         graphviz \
         dumb-init \
         libpq5={{ cookiecutter.postgresql_version.split('.')|first }}.* postgresql-client-{{ cookiecutter.postgresql_version.split('.')|first }} \
         python3-dbg python3-distutils python3-distutils-extra \
         python-is-python3 \
-        libmemcached11 \
+        libmemcached11 libpcre3 \
         sudo ca-certificates \
         nginx \
         gdal-bin python3-gdal
