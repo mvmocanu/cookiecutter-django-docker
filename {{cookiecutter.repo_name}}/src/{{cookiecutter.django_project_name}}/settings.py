@@ -19,7 +19,7 @@ from . import env
 PROJECT_VERSION = '{{ cookiecutter.project_version }}'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/stable/howto/deployment/checklist/
@@ -187,9 +187,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = '/var/app/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, '{{ cookiecutter.django_project_name }}', 'static'),
-]
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 MEDIA_ROOT = '/var/app/media/'
 
