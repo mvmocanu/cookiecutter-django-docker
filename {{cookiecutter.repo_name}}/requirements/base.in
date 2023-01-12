@@ -56,4 +56,4 @@ django-celery-results
 {%- endif %}
 
 uwsgi
-django-uwsgi
+django-uwsgi-admin

@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'django_celery_results',
 {%- endif %}
     'django_extensions',
+    'django_uwsgi',
     '{{ cookiecutter.django_project_name }}.apps.CustomAdminConfig',
     '{{ cookiecutter.django_app_name }}.apps.{{ cookiecutter.django_app_name|replace('_', ' ')|title|replace(' ', '') }}Config',
 ]
@@ -373,3 +374,14 @@ if DEBUG_TOOLBAR:
     DEBUG_TOOLBAR_CONFIG = {
         'SHOW_TOOLBAR_CALLBACK': lambda _: DEBUG,
     }
+
+try:
+    import uwsgi
+except ImportError:
+    pass
+else:
+    INSTALLED_APPS += 'django_uwsgi',
+    if DEBUG_TOOLBAR:
+        from debug_toolbar.settings import PANELS_DEFAULTS
+
+        DEBUG_TOOLBAR_PANELS = ['django_uwsgi.panels.UwsgiPanel'] + PANELS_DEFAULTS
