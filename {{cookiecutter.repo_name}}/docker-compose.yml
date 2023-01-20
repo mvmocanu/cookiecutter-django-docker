@@ -32,9 +32,10 @@ services:
     build:
       context: docker/postgres
     environment:
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app
-      POSTGRES_DB: app
+      POSTGRES_USER:
+      POSTGRES_PASSWORD:
+      POSTGRES_DB:
+      PGDATA:
     command: [
       'postgres',
       '-c', 'log_lock_waits=true',
