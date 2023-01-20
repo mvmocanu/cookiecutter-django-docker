@@ -16,6 +16,8 @@ x-python:
     DJANGO_DEBUG_SQL:
     DJANGO_DEBUG_SQL_LIMIT:
     DJANGO_DEBUG_TOOLBAR:
+    LOGGING_LEVEL:
+    LOGGING_PATH:
   env_file:
     - .env
   tty: false

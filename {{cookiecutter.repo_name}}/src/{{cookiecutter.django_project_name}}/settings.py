@@ -39,7 +39,7 @@ DEBUG_SQL = env.bool('DJANGO_DEBUG_SQL', False)
 DEBUG_SQL_LIMIT = env.int('DJANGO_DEBUG_SQL_LIMIT', 5)
 DEBUG_TOOLBAR = env.bool('DJANGO_DEBUG_TOOLBAR', False)
 LOGGING_PATH = env.get('LOGGING_PATH')
-
+LOGGING_LEVEL = os.environ.get('LOGGING_LEVEL', 'INFO')
 
 ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS')
 ADMINS = [(email, email) for email in env.list('DJANGO_ADMINS')]
@@ -239,7 +239,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': LOGGING_LEVEL,
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
