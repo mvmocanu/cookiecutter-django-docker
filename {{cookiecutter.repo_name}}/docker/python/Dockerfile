@@ -91,8 +91,8 @@ RUN groupadd --gid $GROUP_ID app \
  && useradd --uid $USER_ID --gid $GROUP_ID --shell /bin/bash --create-home app \
  && echo "app ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
 
-RUN mkdir -p /app /var/app/logs /var/app/static /etc/app \
- && chown -R app:app /app
+RUN mkdir -p /app /var/app/logs /var/app/static /var/app/run /etc/app \
+ && chown -R app:app /app /var/app/logs /var/app/run
 
 ENV PYTHONPATH=/app/src
 RUN echo /app/src > $(python -c 'print(__import__("sysconfig").get_path("purelib"))')/app.pth
@@ -121,6 +121,7 @@ COPY docker/python/nginx.conf /etc/app/
 COPY docker/python/nginx.site /tmp/
 COPY docker/python/yacron.yml /etc/app/
 COPY --from=certs /certs/* /etc/app
+
 ADD https://ssl-config.mozilla.org/ffdhe2048.txt /etc/app/dhparam
 
 ARG SERVER_NAME="localhost"
