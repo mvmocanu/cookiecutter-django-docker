@@ -12,9 +12,8 @@ services:
     ports:
       - '80:8000'
     command: [
-      'django-admin',
-      'runserver',
-      '--insecure',
-      '0.0.0.0:8000'
+      'pysu', 'app', '--',
+      'django-admin', 'runserver', '--insecure', '0.0.0.0:8000'
     ]
     stop_signal: SIGINT
+    tty: true

@@ -41,13 +41,13 @@ services:
       - redis
     entrypoint: [ '/entrypoint.sh' ]
 {%- if service == 'celery' %}
-    command: [ 'pysu', 'app', 'celery', '-A', '{{ cookiecutter.django_project_name }}', 'worker' ]
+    command: [ 'pysu', 'app', '--', 'celery', '-A', '{{ cookiecutter.django_project_name }}', 'worker' ]
 {%- elif service == 'cron' %}
-    command: [ 'pysu', 'app', 'yacron', '--config=/etc/app/yacron.yml' ]
+    command: [ 'pysu', 'app', '--', 'yacron', '--config=/etc/app/yacron.yml' ]
 {%- elif domain %}
     command: [ 'uwsgi', '--ini', '/etc/app/uwsgi.ini' ]
 {%- else %}
-    command: [ 'pysu', 'app', '{{ service }}' ]
+    command: [ 'pysu', 'app', '--', '{{ service }}' ]
 {%- endif %}
 {%- endfor %}
   pg:

@@ -56,7 +56,7 @@ services:
     depends_on:
       - pg
     entrypoint: [ '/entrypoint.sh' ]
-    command: [ 'pysu', 'app', 'yacron', '--config=/etc/app/yacron.yml' ]
+    command: [ 'pysu', 'app', '--', 'yacron', '--config=/etc/app/yacron.yml' ]
 
   web:
     <<: *python
@@ -70,7 +70,10 @@ services:
   worker:
     <<: *python
     entrypoint: [ '/entrypoint.sh' ]
-    command: [ 'pysu', 'app', 'celery', '-A', '{{ cookiecutter.django_project_name }}', 'worker' ]
+    command: [
+      'pysu', 'app', '--',
+      'celery', '-A', '{{ cookiecutter.django_project_name }}', 'worker'
+    ]
     depends_on:
       - pg
       - redis
@@ -79,7 +82,10 @@ services:
   worker:
     <<: *python
     entrypoint: [ '/entrypoint.sh' ]
-    command: [ 'pysu', 'app', 'django-admin', 'rqworker' ]
+    command: [
+      'pysu', 'app', '--',
+      'django-admin', 'rqworker'
+    ]
     depends_on:
       - pg
       - redis
