@@ -38,8 +38,8 @@ services:
     ]
   web:
     environment:
-      DJANGO_DB_MIGRATE: y
-      DJANGO_COLLECTSTATIC: y
+      DJANGO_DB_MIGRATE: x
+      DJANGO_COLLECTSTATIC: x
     command: [
       'uwsgi',
       '--ini', '/etc/app/uwsgi.ini',

@@ -8,7 +8,7 @@ x-python:
     args:
       REQUIREMENTS: base
       DJANGO_SETTINGS_MODULE:
-      DJANGO_COLLECTSTATIC: y
+      DJANGO_COLLECTSTATIC: x
   environment:
     PYTHONHUNTER:
     PYTHONHUNTERCONFIG:

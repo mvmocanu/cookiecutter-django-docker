@@ -3,7 +3,7 @@ version: '{{ cookiecutter.docker_compose_version }}'
 services:
   web:
     environment:
-      DJANGO_DB_MIGRATE: y
+      DJANGO_DB_MIGRATE: x
     privileged: true
     ports:
       - '80:8000'
