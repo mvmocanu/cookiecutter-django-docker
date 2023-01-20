@@ -13,6 +13,11 @@
     "celery",
     "none"
   ],
+  "pre_commit_formatter": [
+      "black",
+      "blue",
+      "none"
+  ],
   "deploy_email": "admin@example.com",
   "deploy_services": "demo:demo.example.com worker cron",
   "deploy_ansible_host": "1.2.3.4",
