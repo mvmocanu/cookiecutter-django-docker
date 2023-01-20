@@ -374,14 +374,15 @@ if DEBUG_TOOLBAR:
     DEBUG_TOOLBAR_CONFIG = {
         'SHOW_TOOLBAR_CALLBACK': lambda _: DEBUG,
     }
-
-try:
-    import uwsgi
-except ImportError:
-    pass
-else:
-    INSTALLED_APPS += 'django_uwsgi',
-    if DEBUG_TOOLBAR:
-        from debug_toolbar.settings import PANELS_DEFAULTS
-
-        DEBUG_TOOLBAR_PANELS = ['django_uwsgi.panels.UwsgiPanel'] + PANELS_DEFAULTS
+    DEBUG_TOOLBAR_PANELS = [
+        'django_uwsgi.panels.UwsgiWorkersPanel',
+        'django_uwsgi.panels.UwsgiActionsPanel',
+        'debug_toolbar.panels.timer.TimerPanel',
+        'debug_toolbar.panels.sql.SQLPanel',
+        'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+        'debug_toolbar.panels.templates.TemplatesPanel',
+        'debug_toolbar.panels.cache.CachePanel',
+        'debug_toolbar.panels.signals.SignalsPanel',
+        'debug_toolbar.panels.redirects.RedirectsPanel',
+        'debug_toolbar.panels.profiling.ProfilingPanel',
+    ]
