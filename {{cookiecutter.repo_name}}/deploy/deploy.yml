@@ -25,6 +25,7 @@
         app_version: '{{ app_version }}'
         registry_host: '{{ registry_host }}'
         compose_project_name: '{{ compose_project_name }}'
+        django_settings_module: '{{ django_settings_module }}'
       loop:
         - build
         - push
