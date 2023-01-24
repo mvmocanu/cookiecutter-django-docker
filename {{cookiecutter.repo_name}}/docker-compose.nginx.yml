@@ -57,4 +57,5 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       RELOADER_MONITOR:
+      RELOADER_CONTAINERS:
       COMPOSE_PROJECT_NAME:

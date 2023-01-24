@@ -37,10 +37,8 @@ services:
   pg:
     build:
       context: docker/postgres
-    environment:
-      POSTGRES_USER:
-      POSTGRES_PASSWORD:
-      POSTGRES_DB:
+    env_file:
+      - .env-test
     command: [
       'postgres',
       '-c', 'log_statement=all',
