@@ -20,7 +20,7 @@ if find src -type f -name "*.py[co]" -delete && find src -type d -name "__pycach
 else
     echo -e "\033[1;31mFailed to cleanup pyc files. You may have have problems running the code!\033[0m
 
-\033[33mTo fix run this: \033[1;33msudo chown \$USER -R .\033[0m"
+\033[33mTo fix run this: \033[1;33msudo chown \$USER -R src\033[0m"
 fi
 set -x
 
