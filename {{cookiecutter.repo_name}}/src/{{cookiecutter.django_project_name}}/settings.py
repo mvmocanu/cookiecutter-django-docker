@@ -91,7 +91,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, '{{ cookiecutter.django_project_name }}', 'templates'),
+            BASE_DIR / '{{ cookiecutter.django_project_name }}' / 'templates',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -203,7 +203,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REDIS_HOST = env.str('REDIS_HOST')
 REDIS_PORT = env.int('REDIS_PORT', 6379)
 REDIS_DB = env.int('REDIS_DB', 0)
-REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD')
+REDIS_PASSWORD = env.get('REDIS_PASSWORD')
 REDIS_SOCKET_TIMEOUT = env.int('REDIS_SOCKET_TIMEOUT', 10)
 
 {% if cookiecutter.worker == 'rq' -%}
@@ -322,8 +322,8 @@ if DEBUG_SQL:
                 if hasattr(record, 'duration') and hasattr(record, 'sql') and hasattr(record, 'params'):
                     sql = '\n  '.join(f'\33[33m{line}\33[0m' for line in sqlformat(record.sql or '', reindent=True).strip().splitlines())
                     record.msg = (
-                        f'\33[31mduration: \33[{'' if record.duration < 0.1 else '1;'}31m{record.duration:.4f} secs\33[0m, '
-                        f'\33[33marguments: \33[1{';33' if record.params else ''}m{record.params}\33[0m'
+                        f'\33[31mduration: \33[{"" if record.duration < 0.1 else "1;"}31m{record.duration:.4f} secs\33[0m, '
+                        f'\33[33marguments: \33[1{";33" if record.params else ""}m{record.params}\33[0m'
                         f'\n  {sql}\n \33[1;32m-- stack: \n{stack}\33[0m'
                     )
                     record.args = ()

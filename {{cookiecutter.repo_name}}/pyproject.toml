@@ -3,7 +3,7 @@
 line-length = 140
 target-version = ['py310']
 skip-string-normalization = true
-{% elif cookiecutter.pre_commit_formatter == 'blue' -%}
+{%- elif cookiecutter.pre_commit_formatter == 'blue' -%}
 [tool.blue]
 line-length = 140
 target-version = ['py310']
