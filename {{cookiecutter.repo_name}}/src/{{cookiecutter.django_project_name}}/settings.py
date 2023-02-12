@@ -52,7 +52,7 @@ EMAIL_USE_SSL = env.bool('DJANGO_EMAIL_USE_SSL', None)
 EMAIL_BACKEND = env.str('DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_FILE_PATH = env.get('DJANGO_EMAIL_FILE_PATH')
 
-DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL')
+DEFAULT_FROM_EMAIL = env.get('DEFAULT_FROM_EMAIL')
 
 
 # Application definition
@@ -200,13 +200,13 @@ X_FRAME_OPTIONS = 'ORIGIN'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+{% if cookiecutter.worker == 'rq' -%}
 REDIS_HOST = env.str('REDIS_HOST')
 REDIS_PORT = env.int('REDIS_PORT', 6379)
 REDIS_DB = env.int('REDIS_DB', 0)
 REDIS_PASSWORD = env.get('REDIS_PASSWORD')
 REDIS_SOCKET_TIMEOUT = env.int('REDIS_SOCKET_TIMEOUT', 10)
 
-{% if cookiecutter.worker == 'rq' -%}
 RQ_QUEUES = {
     'default': {
         'HOST': REDIS_HOST,
