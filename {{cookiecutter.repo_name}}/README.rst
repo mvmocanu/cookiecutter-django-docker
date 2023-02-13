@@ -25,10 +25,6 @@ For one-off commands::
 
     docker-compose run --rm web pysu app yourcommand
 
-.. warning::
-
-    When running python commands, don't forget to use ``python3`` instead of ``python``!
-
 To start the project::
 
     docker-compose up
