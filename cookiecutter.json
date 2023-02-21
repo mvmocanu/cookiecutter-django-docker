@@ -14,9 +14,9 @@
     "none"
   ],
   "pre_commit_formatter": [
-      "black",
-      "blue",
-      "none"
+    "black",
+    "blue",
+    "none"
   ],
   "deploy_email": "admin@example.com",
   "deploy_services": "demo:demo.example.com worker cron",
@@ -28,9 +28,9 @@
   "timezone": "Europe/Bucharest",
   "project_version": "0.1.0",
   "dockerfile_version": "1",
-  "pip_version": "22.3.1",
-  "pip_tools_version": "6.12.1",
-  "setuptools_version": "66.0.0",
+  "pip_version": "23.0.1",
+  "pip_tools_version": "6.12.2",
+  "setuptools_version": "67.3.3",
   "docker_compose_version": "3.8",
   "postgresql_version": "15",
   "redis_version": "7",
