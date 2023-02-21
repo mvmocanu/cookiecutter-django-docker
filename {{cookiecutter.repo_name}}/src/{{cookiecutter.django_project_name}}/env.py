@@ -8,7 +8,7 @@ def get(key):
 
 def str(key, default=Ellipsis):
     if default is Ellipsis:
-        if bool('__strict_env__', True):
+        if bool("__strict_env__", True):
             return os.environ[key]
         else:
             return os.environ.get(key)
@@ -16,7 +16,7 @@ def str(key, default=Ellipsis):
         return os.environ.get(key, default)
 
 
-def list(key, default=None, separator=','):
+def list(key, default=None, separator=","):
     value = str(key, default)
     if value is None:
         return []
@@ -30,6 +30,6 @@ def int(key, default):
 
 def bool(key, default):
     if key in os.environ:
-        return os.environ.get(key).lower() in ('yes', 'true', 'y', '1')
+        return os.environ.get(key).lower() in ("yes", "true", "y", "1")
     else:
         return default

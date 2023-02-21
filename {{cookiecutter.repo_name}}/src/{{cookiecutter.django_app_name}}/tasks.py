@@ -1,4 +1,4 @@
-{% if cookiecutter.worker == 'rq' -%}
+{% if cookiecutter.worker == "rq" -%}
 from django_rq import job
 
 
