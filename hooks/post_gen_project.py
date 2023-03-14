@@ -103,6 +103,14 @@ if __name__ == "__main__":
           or
         cp .env-windows .env
 
+    To update concrete requirements (.txt files):
+
+        ./test.sh requirements
+
+    To run tests:
+
+        ./test.sh
+
     To build the project:
 
         docker compose build --pull

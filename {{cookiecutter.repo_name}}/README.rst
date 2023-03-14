@@ -18,6 +18,16 @@ Change the file according to the comments in the example file.
 
 docker compose will refuse to build the project if a .env file is missing.
 
+Managing requirements
+---------------------
+
+Python requirements are managed with pip-tools - abstract requirements are in ".in" files while concrete requirements (pins) are in ".txt"
+files.
+
+There is a shim to update all the files correctly (using pip-tools installed in a correct environment) - just run::
+
+    ./test.sh requirements
+
 Running the application
 -----------------------
 
