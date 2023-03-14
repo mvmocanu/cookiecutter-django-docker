@@ -105,9 +105,9 @@ if __name__ == "__main__":
 
     To build the project:
 
-        docker-compose build --pull
+        docker compose build --pull
 
     You can bring up the project with:
 
-        docker-compose up
+        docker compose up
     """)

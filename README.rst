@@ -84,20 +84,20 @@ Using the project
 
 To build the project::
 
-    docker-compose build --pull
+    docker compose build --pull
 
 This template previously had a base image but it's just too much of a hassle and
 layer caching work well enough to have individual images.
 
 To start the project run::
 
-    docker-compose up
+    docker compose up
 
 The project will provide a small shim for running tests, try::
 
   ./test.sh --help
 
-Working with the project is the usual ``docker-compose up`` and such, nothing special or unexpected.
+Working with the project is the usual ``docker compose up`` and such, nothing special or unexpected.
 
 .. _Pytest: http://pytest.org/
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
