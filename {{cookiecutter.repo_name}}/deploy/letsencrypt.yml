@@ -5,7 +5,7 @@
       lineinfile:
         create: true
         dest: /services/deploy.log
-        line: ===== {{ inventory_dir|basename }} setup @ {{ now() }} =====
+        line: ===== {{ inventory_dir|basename }} letsencrypt @ {{ now() }} =====
     - name: deploy hook
       copy:
         dest: /services/nginx/etc/renewal-hooks/deploy/run
