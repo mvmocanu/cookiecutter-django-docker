@@ -21,8 +21,8 @@
     "none"
   ],
   "deploy_email": "admin@example.com",
-  "deploy_services": "demo:demo.example.com worker cron",
   "deploy_name": "demo",
+  "deploy_services": "{{ cookiecutter.deploy_name }}:demo.example.com {{ cookiecutter.deploy_name }}_worker {{ cookiecutter.deploy_name }}_cron",
   "deploy_ansible_host": "1.2.3.4",
   "deploy_ansible_port": "22",
   "django_allowed_hosts": "{{ cookiecutter.deploy_services.split()[0].split(':')[-1] }}",
