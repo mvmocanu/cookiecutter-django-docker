@@ -297,14 +297,11 @@ if SENTRY_DSN:
 
 if DEBUG_SQL:
     import sys
-
-    try:
-        from sqlparse import format as sqlformat
-    except ImportError:
-        sqlformat = lambda s, reindent=None: s
     from traceback import format_stack
 
-    class WithStacktrace(object):
+    from sqlparse import format as sqlformat
+
+    class AddStackLoggingFilter:
         def __init__(self, skip=(), limit=5):
             self.skip = [__name__, "logging"]
             self.skip.extend(skip)
@@ -333,8 +330,8 @@ if DEBUG_SQL:
     LOGGING["loggers"]["django.db.backends"]["level"] = "DEBUG"
     LOGGING["loggers"]["django.db.backends"]["filters"] = ["add_stack"]
     LOGGING["filters"]["add_stack"] = {
-        "()": WithStacktrace,
-        "skip": ("django.db", "south.", "__main__"),
+        "()": AddStackLoggingFilter,
+        "skip": ("django.db", "__main__"),
         "limit": DEBUG_SQL_LIMIT,
     }
 

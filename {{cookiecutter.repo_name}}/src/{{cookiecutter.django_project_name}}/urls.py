@@ -32,7 +32,7 @@ if settings.DEBUG:
     ]
 
 try:
-    import uwsgi  # noqa
+    import uwsgi  # noqa: F401
 except ImportError:
     pass
 else:
@@ -45,4 +45,5 @@ if settings.DEBUG_TOOLBAR:
 
     urlpatterns = [
         path("__debug__/", include(debug_toolbar.urls)),
-    ] + urlpatterns
+        *urlpatterns,
+    ]

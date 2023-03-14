@@ -14,9 +14,9 @@ defaults:
   failsWhen:
     producesStdout: false
     producesStderr: false
+{% endraw -%}
 jobs:
-  - name: stuff
+  - name: {{ cookiecutter.django_command_name }}
     schedule:
       minute: '*/5'
-    command: django-admin stuff
-{% endraw -%}
+    command: django-admin {{ cookiecutter.django_command_name }}
