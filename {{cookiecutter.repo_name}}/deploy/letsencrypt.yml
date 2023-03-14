@@ -1,6 +1,11 @@
 {% raw -%}
 - hosts: all
   tasks:
+    - name: log deployment
+      lineinfile:
+        create: true
+        dest: /services/deploy.log
+        line: ===== {{ inventory_dir|basename }} setup @ {{ now() }} =====
     - name: deploy hook
       copy:
         dest: /services/nginx/etc/renewal-hooks/deploy/run
@@ -23,35 +28,37 @@
         hour: '1'
         job: docker compose exec --no-TTY nginx certbot renew >> /services/nginx/logs/cron.log 2>&1
     - name: initial setup
-      args:
+      shell:
         executable: /bin/bash
-      shell: |
-        set -euxo pipefail
-        echo "
-        ####################################
-            $(date)
-        ####################################" >> /services/nginx/logs/setup.log
-        docker compose run --rm --no-TTY nginx certbot certonly \
-          --webroot \
-          --agree-tos \
-          --preferred-challenges=http-01 \
-          --email={{ letsencrypt_email }} \
-          --webroot-path=/shared/{{ item }} \
-          --domain={{ item }} \
-          --non-interactive \
-          --keep-until-expiring 2>&1 | tee -a /services/nginx/logs/setup.log
+        cmd: |
+          exec > >(tee -a /services/deploy.log) 2>&1
+          set -euxo pipefail
+          docker compose run --rm --no-TTY nginx certbot certonly \
+            --webroot \
+            --agree-tos \
+            --preferred-challenges=http-01 \
+            --email={{ letsencrypt_email }} \
+            --webroot-path=/shared/{{ item }} \
+            --domain={{ item }} \
+            --non-interactive \
+            --keep-until-expiring 2>&1 | tee -a /services/nginx/logs/setup.log
       loop: '{{ letsencrypt_domains|list }}'
     - name: manually copy certs
-      args:
+      shell:
         executable: /bin/bash
-      shell: |
-        set -euxo pipefail
-        docker compose run --rm --no-TTY \
-          -e 'RENEWED_LINEAGE=/etc/letsencrypt/live/{{ item }}' \
-          -e 'RENEWED_DOMAINS={{ item }}' \
-          nginx /etc/letsencrypt/renewal-hooks/deploy/run >> /services/nginx/logs/setup.log
+        cmd: |
+          exec > >(tee -a /services/deploy.log) 2>&1
+          set -euxo pipefail
+          docker compose run --rm --no-TTY \
+            -e 'RENEWED_LINEAGE=/etc/letsencrypt/live/{{ item }}' \
+            -e 'RENEWED_DOMAINS={{ item }}' \
+            nginx /etc/letsencrypt/renewal-hooks/deploy/run >> /services/nginx/logs/setup.log
       loop: '{{ letsencrypt_domains|list }}'
     - name: reload nginx
-      command:
-        cmd: docker compose kill --signal HUP nginx
+      shell:
+        executable: /bin/bash
+        cmd: |
+          exec > >(tee -a /services/deploy.log) 2>&1
+          set -euxo pipefail
+          docker compose kill --signal HUP nginx
 {% endraw -%}
