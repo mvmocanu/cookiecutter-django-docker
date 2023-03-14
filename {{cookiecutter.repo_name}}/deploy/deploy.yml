@@ -1,7 +1,7 @@
 {% raw -%}
 - hosts: 127.0.0.1
   connection: local
-  tags: build
+  tags: [build]
   tasks:
     - name: start registry
       docker_compose:
@@ -20,7 +20,7 @@
     - name: build and publish image
       command:
         chdir: ..
-        cmd: docker compose -f {{ inventory_dir }}/docker-compose.build.yml {{ item }}
+        cmd: docker compose --file {{ inventory_dir }}/docker-compose.build.yml {{ item }}
       environment:
         app_version: '{{ app_version }}'
         registry_host: '{{ registry_host }}'
@@ -31,65 +31,87 @@
         - push
 - hosts: all
   tasks:
+    - name: log deployment
+      tags: [always]
+      lineinfile:
+        create: true
+        dest: /services/deploy.log
+        line: ===== {{ inventory_dir|basename }} deploy @ {{ now() }} =====
     - name: copy release docker-compose.yml
       template:
         src: '{{ inventory_dir }}/docker-compose.release.yml'
         dest: '/services/{{ compose_file }}'
     - name: get available compose files
+      tags: [always]
       find:
         paths: /services
         patterns: docker-compose*.yml
-      register: compose_files
+      register: compose_files_register
+- hosts: all
+  vars:
+    compose_files: '{{ compose_files_register.files | map(attribute="path") | join(":") }}'
+  environment:
+    COMPOSE_FILE: '{{ compose_files }}'
+  tasks:
     - name: set default docker-compose.yml in environment
-      tags: env
+      tags: [env]
       lineinfile:
         dest: /etc/environment
         regexp: '^COMPOSE_FILE='
-        line: 'COMPOSE_FILE={{ compose_files.files | map(attribute="path") | join(":") }}'
-    - name: start/update services
-      tags: restart
-      docker_compose:
-        project_src: '/services'
-        files: '{{ compose_files.files | map(attribute="path") | list }}'
+        line: 'COMPOSE_FILE={{ compose_files|quote }}'
     - name: ensure new users/databases
       when: database_name is defined
-      args:
+      shell:
         executable: /bin/bash
-      shell: |
-        set -euxo pipefail
-        echo "
-        ####################################
-            $(date)
-        ####################################" >> /services/setup.log
-        docker compose exec -T -e POSTGRES_EXTRAS={{ database_name }} pg /docker-entrypoint-initdb.d/extra-users.sh
+        cmd: |
+          exec > >(tee -a /services/deploy.log) 2>&1
+          set -euxo pipefail
+          docker compose exec -T -e POSTGRES_EXTRAS={{ database_name }} pg /docker-entrypoint-initdb.d/extra-users.sh
     - name: run migrations
-      environment:
-        COMPOSE_FILE: '{{ compose_files.files | map(attribute="path") | join(":") }}'
-      args:
+      shell:
         executable: /bin/bash
-      shell: |
-        set -euxo pipefail
-        echo "
-        ####################################
-            $(date)
-        ####################################" >> /services/{{ item }}/logs/migrations.log
-        docker compose run --rm -T {{ item }} pysu app django-admin migrate --no-input 2>&1 | tee -a /services/{{ item }}/logs/migrations.log
-        docker compose run --rm -T {{ item }} pysu app django-admin collectstatic --noinput --clear -v0
+        cmd: |
+          set -euxo pipefail
+          docker compose run --rm --no-TTY {{ item.key }} pysu app django-admin migrate --no-input
+      loop: '{{ services|dict2items }}'
+      when: item.value
+    - name: run collectstatic
+      shell:
+        executable: /bin/bash
+        cmd: |
+          set -euxo pipefail
+          docker compose run --rm --no-TTY {{ item.key }} pysu app django-admin collectstatic --noinput --clear -v0
+      loop: '{{ services|dict2items }}'
+      when: item.value
+    - name: restart services
+      tags: [restart, never]
+      shell:
+        executable: /bin/bash
+        cmd: |
+          exec > >(tee -a /services/deploy.log) 2>&1
+          set -euxo pipefail
+          docker compose restart {{ item }}
       loop: '{{ services|list }}'
-      register: migration_result
-      failed_when:
-        - migration_result.rc != 0
+    - name: start/update services
+      tags: [restart]
+      shell:
+        executable: /bin/bash
+        cmd: |
+          exec > >(tee -a /services/deploy.log) 2>&1
+          set -euxo pipefail
+          docker compose up --detach --quiet-pull --no-color
     - name: reload nginx
-      environment:
-        COMPOSE_FILE: '{{ compose_files.files | map(attribute="path") | join(":") }}'
-      command:
-        cmd: docker compose kill -s HUP nginx
+      shell:
+        executable: /bin/bash
+        cmd: |
+          set -euxo pipefail
+          docker compose kill --signal HUP nginx
 - hosts: 127.0.0.1
   connection: local
-  tags: build
+  tags: [build]
   tasks:
     - name: shutdown registry
-      tags: cleanup
+      tags: [cleanup]
       docker_compose:
         project_name: registry
         state: absent

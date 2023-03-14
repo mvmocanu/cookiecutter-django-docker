@@ -2,7 +2,7 @@
 - hosts: all
   tasks:
     - name: debug
-      tags: env
+      tags: [env]
       vars:
         msg:
           registry_host: '{{ registry_host }}'
@@ -37,12 +37,13 @@
         - '{{ services|list }}'
         - pg
     - name: 'copy .env'
-      tags: env
+      tags: [env]
       copy:
         src: '{{ inventory_dir }}/.env'
         dest: '/services/{{ item }}/.env'
         backup: yes
       loop: '{{ services|list }}'
+      register: envfiles
     - name: logrotate config
       copy:
         dest: '/etc/logrotate.d/{{ item }}'
@@ -88,20 +89,52 @@
           - containerd.io
           - docker-compose-plugin
     - name: get available compose files
-      tags: env
+      tags: [always]
       find:
         paths: /services
         patterns: docker-compose*.yml
-      register: compose_files
+      register: compose_files_register
+- hosts: all
+  vars:
+    compose_files: '{{ compose_files_register.files | map(attribute="path") | join(":") }}'
+  environment:
+    COMPOSE_FILE: '{{ compose_files }}'
+  tasks:
     - name: set default docker-compose.yml in environment
-      tags: env
+      tags: [env]
       lineinfile:
         dest: /etc/environment
         regexp: '^COMPOSE_FILE='
-        line: 'COMPOSE_FILE={{ compose_files.files | map(attribute="path") | join(":") }}'
+        line: 'COMPOSE_FILE={{ compose_files|quote }}'
+    - name: allow http
+      loop: '{{ groups.web }}'
+      ufw:
+        rule: allow
+        proto: tcp
+        from: '{{ hostvars[item].ansible_default_ipv4.address }}'
+        to: any
+        port: '80'
+    - name: allow https
+      loop: '{{ groups.web }}'
+      ufw:
+        rule: allow
+        proto: tcp
+        from: '{{ hostvars[item].ansible_default_ipv4.address }}'
+        to: any
+        port: '443'
+    - name: log deployment
+      tags: [always]
+      lineinfile:
+        create: true
+        dest: /services/deploy.log
+        line: ===== {{ inventory_dir|basename }} setup @ {{ now() }} =====
     - name: update services after env update
-      tags: [ never, env ]
-      docker_compose:
-        project_src: '/services'
-        files: '{{ compose_files.files | map(attribute="path") | list }}'
+      when: envfiles.changed and compose_files
+      tags: [env]
+      shell:
+        executable: /bin/bash
+        cmd: |
+          exec > >(tee -a /services/deploy.log) 2>&1
+          set -euxo pipefail
+          docker compose up --detach --quiet-pull --no-color
 {% endraw -%}

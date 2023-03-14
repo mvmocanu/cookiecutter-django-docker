@@ -21,7 +21,7 @@
         name: certbot_renew
         minute: '0'
         hour: '1'
-        job: docker compose exec -T nginx certbot renew >> /services/nginx/logs/cron.log 2>&1
+        job: docker compose exec --no-TTY nginx certbot renew >> /services/nginx/logs/cron.log 2>&1
     - name: initial setup
       args:
         executable: /bin/bash
@@ -31,7 +31,7 @@
         ####################################
             $(date)
         ####################################" >> /services/nginx/logs/setup.log
-        docker compose run --rm -T nginx certbot certonly \
+        docker compose run --rm --no-TTY nginx certbot certonly \
           --webroot \
           --agree-tos \
           --preferred-challenges=http-01 \
@@ -46,12 +46,12 @@
         executable: /bin/bash
       shell: |
         set -euxo pipefail
-        docker compose run --rm -T \
+        docker compose run --rm --no-TTY \
           -e 'RENEWED_LINEAGE=/etc/letsencrypt/live/{{ item }}' \
           -e 'RENEWED_DOMAINS={{ item }}' \
           nginx /etc/letsencrypt/renewal-hooks/deploy/run >> /services/nginx/logs/setup.log
       loop: '{{ letsencrypt_domains|list }}'
     - name: reload nginx
       command:
-        cmd: docker compose kill -s HUP nginx
+        cmd: docker compose kill --signal HUP nginx
 {% endraw -%}
