@@ -4,16 +4,16 @@
 #   pre-commit autoupdate
 exclude: '^(\.bumpversion\.cfg)(/|$)'
 repos:
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.254
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix, --show-fixes]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: master
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
-      - id: debug-statements
-  - repo: https://github.com/timothycrosley/isort
-    rev: master
-    hooks:
-      - id: isort
 {%- if cookiecutter.pre_commit_formatter == 'black' %}
   - repo: https://github.com/psf/black
     rev: main
@@ -25,7 +25,3 @@ repos:
     hooks:
       - id: blue
 {%- endif %}
-  - repo: https://github.com/pycqa/flake8
-    rev: master
-    hooks:
-      - id: flake8

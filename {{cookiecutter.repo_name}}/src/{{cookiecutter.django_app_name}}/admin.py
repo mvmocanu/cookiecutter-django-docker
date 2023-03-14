@@ -7,13 +7,13 @@ from django.contrib.admin import register
 from django_rq import views
 {%- endif %}
 
-from .models import Stuff
+from .models import {{ cookiecutter.django_model_name }}
 {%- if cookiecutter.worker == "rq" %}
 
 register_view(app_label="django_rq", model_name="RQ")(views.stats)
 {%- endif %}
 
 
-@register(Stuff)
-class StuffAdmin(admin.ModelAdmin):
+@register({{ cookiecutter.django_model_name }})
+class {{ cookiecutter.django_model_name }}Admin(admin.ModelAdmin):
     pass

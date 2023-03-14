@@ -52,6 +52,7 @@
         project_src: '/services'
         files: '{{ compose_files.files | map(attribute="path") | list }}'
     - name: ensure new users/databases
+      when: database_name is defined
       args:
         executable: /bin/bash
       shell: |
@@ -60,7 +61,7 @@
         ####################################
             $(date)
         ####################################" >> /services/setup.log
-        docker-compose exec -T pg /docker-entrypoint-initdb.d/extra-users.sh
+        docker-compose exec -T -e POSTGRES_EXTRAS={{ database_name }} pg /docker-entrypoint-initdb.d/extra-users.sh
     - name: run migrations
       environment:
         COMPOSE_FILE: '{{ compose_files.files | map(attribute="path") | join(":") }}'

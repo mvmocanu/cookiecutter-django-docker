@@ -1,9 +1,44 @@
-{% if cookiecutter.pre_commit_formatter == 'black' -%}
+[tool.ruff]
+extend-exclude = ["static", "ci/templates"]
+ignore = [
+    "A002", # flake8-builtins builtin-argument-shadowing
+    "A003", # flake8-builtins builtin-attribute-shadowing
+    "ANN", # flake8-annotations
+    "ARG", # flake8-unused-arguments
+    "BLE", # flake8-blind-except
+    "COM", # flake8-commas
+    "D", # pydocstyle
+    "EM", # flake8-errmsg
+    "ERA", # eradicate
+    "FBT", # flake8-boolean-trap
+    "PLR", # Pylint Refactor
+    "PLW", # Pylint Warning
+    "RET", # flake8-return
+    "RUF001", # Ruff-specific rules ambiguous-unicode-character-string
+    "S101", # flake8-bandit assert
+    "SLF", # flake8-self
+    "T20", # flake8-print
+    "TRY", # tryceratops
+]
+line-length = 140
+select = ["ALL"]
+src = ["src", "tests"]
+target-version = "py310"
+
+[tool.ruff.flake8-pytest-style]
+fixture-parentheses = false
+mark-parentheses = false
+
+[tool.ruff.isort]
+forced-separate = ["conftest"]
+force-single-line = true
+
+{% if cookiecutter.pre_commit_formatter == "black" -%}
 [tool.black]
 line-length = 140
-target-version = ['py310']
-{%- elif cookiecutter.pre_commit_formatter == 'blue' -%}
+target-version = ["py310"]
+{%- elif cookiecutter.pre_commit_formatter == "blue" -%}
 [tool.blue]
 line-length = 140
-target-version = ['py310']
+target-version = ["py310"]
 {%- endif %}

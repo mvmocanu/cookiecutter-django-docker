@@ -17,7 +17,7 @@ from . import env
 
 PROJECT_VERSION = "{{ cookiecutter.project_version }}"
 
-# Build paths inside the project like this: BASE_DIR / "subdir".
+# This is the {{ cookiecutter.django_project_name }} directory
 BASE_DIR = Path(__file__).resolve().parent
 
 # Quick-start development settings - unsuitable for production
@@ -90,7 +90,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            BASE_DIR / "{{ cookiecutter.django_project_name }}" / "templates",
+            BASE_DIR / "templates",
         ],
         "APP_DIRS": True,
         "OPTIONS": {

@@ -8,6 +8,8 @@
   "django_project_name": "{{ cookiecutter.name.lower().replace(' ','_').replace('-','_') }}_project",
   "compose_project_name": "{{ cookiecutter.name.lower().replace(' ','').replace('-','').replace('-','').replace('a', '').replace('e', '').replace('u', '').replace('i', '').replace('o', '').replace('a', '')[:4] }}",
   "django_app_name": "{{ cookiecutter.name.lower().replace(' ','_').replace('-','_') }}",
+  "django_model_name": "Stuff",
+  "django_command_name": "check_{{ cookiecutter.django_model_name.lower() }}",
   "worker": [
     "rq",
     "celery",
@@ -20,6 +22,7 @@
   ],
   "deploy_email": "admin@example.com",
   "deploy_services": "demo:demo.example.com worker cron",
+  "deploy_name": "demo",
   "deploy_ansible_host": "1.2.3.4",
   "deploy_ansible_port": "22",
   "django_allowed_hosts": "{{ cookiecutter.deploy_services.split()[0].split(':')[-1] }}",

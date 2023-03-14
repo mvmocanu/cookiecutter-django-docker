@@ -1,5 +1,5 @@
 from django.db import models
 
 
-class Stuff(models.Model):
+class {{ cookiecutter.django_model_name }}(models.Model):
     pass

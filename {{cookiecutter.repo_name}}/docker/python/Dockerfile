@@ -125,7 +125,7 @@ COPY --from=certs /certs/* /etc/app
 ADD https://ssl-config.mozilla.org/ffdhe2048.txt /etc/app/dhparam
 
 ARG SERVER_NAME="localhost"
-RUN envsubst < /tmp/nginx.site > /etc/app/nginx.site
+RUN envsubst \$SERVER_NAME < /tmp/nginx.site > /etc/app/nginx.site
 RUN cp /etc/app/fullchain.pem /etc/app/chain.pem \
  && ln -sf /etc/app/nginx.conf /etc/nginx/nginx.conf \
  && cp /etc/nginx/mime.types /etc/app \

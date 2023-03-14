@@ -58,12 +58,17 @@ if __name__ == "__main__":
         warn('+ git init')
         subprocess.check_call(['git', 'init'])
 
-{%- if cookiecutter.worker != "rq" %}
+{%- if cookiecutter.worker == "rq" %}
+    os.unlink(join('src', '{{ cookiecutter.django_project_name }}', 'celery.py'))
+{%- elif cookiecutter.worker == "celery" %}
+    os.unlink(join('docker', 'python', 'worker.ini'))
+{%- else %}
+    os.unlink(join('src', '{{ cookiecutter.django_app_name }}', 'tasks.py'))
+    os.unlink(join('src', '{{ cookiecutter.django_project_name }}', 'celery.py'))
     os.unlink(join('docker', 'python', 'worker.ini'))
 {%- endif %}
-{%- if cookiecutter.worker != "celery" %}
-    os.unlink(join('src', '{{ cookiecutter.django_project_name }}', 'celery.py'))
-{%- endif %}
+    if os.path.exists('.isort.cfg'):
+        os.unlink('.isort.cfg')
 
     if not os.path.exists('.env'):
         warn("You don't have an .env file yet. The default linux one is being copied for you...")
@@ -77,8 +82,8 @@ if __name__ == "__main__":
         warn("You don't have an docker-lock.json yet. Generating it now...")
         note('+ docker lock generate --update-existing-digests')
         subprocess.check_call(['docker', 'lock', 'generate', '--update-existing-digests'])
-        note('+ docker lock rewrite --tempdir .')
-        subprocess.check_call(['docker', 'lock', 'rewrite', '--tempdir', '.'])
+    note('+ docker lock rewrite --tempdir .')
+    subprocess.check_call(['docker', 'lock', 'rewrite', '--tempdir', '.'])
 
     note('+ pre-commit autoupdate')
     subprocess.check_call(['pre-commit', 'autoupdate'])
