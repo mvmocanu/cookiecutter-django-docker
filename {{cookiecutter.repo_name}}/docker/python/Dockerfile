@@ -1,8 +1,6 @@
 # syntax=docker/dockerfile:{{ cookiecutter.dockerfile_version }}
 FROM buildpack-deps:{{ cookiecutter.ubuntu_version }}-scm as deps
 
-ARG TZ=UTC
-
 # DEBIAN_FRONTEND=noninteractive exists to prevent tzdata going nuts.
 # Maybe dpkg incorrectly detects interactive on buildkit containers?
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list \
@@ -50,8 +48,6 @@ FROM ubuntu:{{ cookiecutter.ubuntu_version }}
 #################
 RUN test -e /etc/apt/apt.conf.d/docker-clean # sanity check
 
-ARG TZ={{ cookiecutter.timezone }}
-ENV TZ=$TZ
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         curl software-properties-common gpg-agent \
@@ -59,6 +55,7 @@ RUN apt-get update \
  && curl -fsSL11 'https://www.postgresql.org/media/keys/ACCC4CF8.asc' | apt-key add - \
  && apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        tzdata \
         strace ltrace gdb lsof locate net-tools htop iputils-ping dnsutils \
         nano vim tree less telnet \
         socat byobu \
@@ -72,7 +69,10 @@ RUN apt-get update \
         nginx \
         gdal-bin python3-gdal
 
-
+ARG TZ={{ cookiecutter.timezone }}
+ENV TZ=$TZ
+RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
+ && dpkg-reconfigure -f noninteractive tzdata
 
 RUN bash -o pipefail -c "curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | \
     python - --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}"
