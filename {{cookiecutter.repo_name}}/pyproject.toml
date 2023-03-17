@@ -34,12 +34,12 @@ mark-parentheses = false
 forced-separate = ["conftest"]
 force-single-line = true
 
-{% if cookiecutter.pre_commit_formatter == "black" -%}
 [tool.black]
 line-length = 140
 target-version = ["py310"]
-{%- elif cookiecutter.pre_commit_formatter == "blue" -%}
-[tool.blue]
-line-length = 140
-target-version = ["py310"]
+{%- if cookiecutter.formatter_quote_style == "single" %}
+skip-string-normalization = true
+
+[tool.ruff.flake8-quotes]
+inline-quotes = "single"
 {%- endif %}

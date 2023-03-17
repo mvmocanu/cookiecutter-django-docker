@@ -15,10 +15,9 @@
     "celery",
     "none"
   ],
-  "pre_commit_formatter": [
-    "black",
-    "blue",
-    "none"
+  "formatter_quote_style": [
+    "double",
+    "single"
   ],
   "deploy_email": "admin@example.com",
   "deploy_name": "demo",
