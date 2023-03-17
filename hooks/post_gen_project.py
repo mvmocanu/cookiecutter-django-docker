@@ -75,15 +75,12 @@ if __name__ == "__main__":
         note('+ cp .env-linux-osx .env')
         shutil.copy('.env-linux-osx', '.env')
 
-    if os.path.exists('docker-lock.json'):
-        note('+ docker lock verify --update-existing-digests')
-        subprocess.check_call(['docker', 'lock', 'verify', '--update-existing-digests'])
-    else:
-        warn("You don't have an docker-lock.json yet. Generating it now...")
-        note('+ docker lock generate --update-existing-digests')
-        subprocess.check_call(['docker', 'lock', 'generate', '--update-existing-digests'])
+    note('+ docker lock generate --update-existing-digests')
+    subprocess.check_call(['docker', 'lock', 'generate', '--update-existing-digests'])
     note('+ docker lock rewrite --tempdir .')
     subprocess.check_call(['docker', 'lock', 'rewrite', '--tempdir', '.'])
+    note('+ docker lock verify --update-existing-digests')
+    subprocess.check_call(['docker', 'lock', 'verify', '--update-existing-digests'])
 
     note('+ pre-commit autoupdate')
     subprocess.check_call(['pre-commit', 'autoupdate'])
