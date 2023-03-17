@@ -18,6 +18,7 @@ ignore = [
     "S101", # flake8-bandit assert
     "SLF", # flake8-self
     "T20", # flake8-print
+    "TCH", # flake8-type-checking
     "TID", # flake8-tidy-imports
     "TRY", # tryceratops
 ]
