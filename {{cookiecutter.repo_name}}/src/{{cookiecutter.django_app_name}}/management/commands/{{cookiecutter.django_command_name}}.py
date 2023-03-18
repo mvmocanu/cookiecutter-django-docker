@@ -12,5 +12,5 @@ class Command(BaseCommand):
         parser.add_argument("{{ cookiecutter.django_model_name.lower() }}_id")
 
     def handle(self, {{ cookiecutter.django_model_name.lower() }}_id, **options):
-        stuff: {{ cookiecutter.django_model_name }} = {{ cookiecutter.django_model_name }}.objects.get(id=stuff_id)
+        stuff: {{ cookiecutter.django_model_name }} = {{ cookiecutter.django_model_name }}.objects.get(id={{ cookiecutter.django_model_name.lower() }}_id)
         stuff.save()
