@@ -27,6 +27,7 @@
   "django_allowed_hosts": "{{ cookiecutter.deploy_services.split()[0].split(':')[-1] }}",
   "short_description": "An example project. Generated with ionelmc/cookiecutter-django-docker.",
   "sentry_dsn": "https://XXX@YYY.ingest.sentry.io/ZZZ",
+  "analytics_gtag": "G-",
   "timezone": "Europe/Bucharest",
   "project_version": "0.1.0",
   "dockerfile_version": "1",
