@@ -69,6 +69,8 @@ if __name__ == "__main__":
 {%- endif %}
     if os.path.exists('.isort.cfg'):
         os.unlink('.isort.cfg')
+    if os.path.exists('setup.cfg'):
+        os.unlink('setup.cfg')
 
     if not os.path.exists('.env'):
         warn("You don't have an .env file yet. The default linux one is being copied for you...")
