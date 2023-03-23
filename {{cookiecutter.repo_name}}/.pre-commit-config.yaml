@@ -5,10 +5,30 @@
 exclude: '^(\.bumpversion\.cfg)(/|$)'
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.254
+    rev: main
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix, --show-fixes]
+  - repo: https://github.com/asottile/pyupgrade
+    rev: main
+    hooks:
+      - id: pyupgrade
+        args: [ --py310-plus ]
+  - repo: https://github.com/adamchainz/django-upgrade
+    rev: main
+    hooks:
+      - id: django-upgrade
+        args: [ --target-version, "4.2" ]
+  - repo: https://github.com/thibaudcolas/curlylint
+    rev: v0.13.1
+    hooks:
+      - id: curlylint
+  - repo: https://github.com/rtts/djhtml
+    rev: main
+    hooks:
+      - id: djhtml
+      - id: djcss
+      - id: djjs
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: master
     hooks:
