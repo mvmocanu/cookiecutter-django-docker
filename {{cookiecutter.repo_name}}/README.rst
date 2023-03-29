@@ -16,7 +16,12 @@ Select ``.env-linux-osx`` or ``.env-windows`` (depending on your OS) and rename 
 
 Change the file according to the comments in the example file.
 
-docker compose will refuse to build the project if a .env file is missing.
+Docker Compose will refuse to build the project if a .env file is missing.
+
+This project setup assumes you have followed the
+`Docker post-installation steps <https://docs.docker.com/engine/install/linux-postinstall/>`_ and you can access the Docker daemon without
+sudo.
+
 
 Managing requirements
 ---------------------
