@@ -29,6 +29,12 @@ SERVER_PROTOCOL = env.str("SERVER_PROTOCOL", "https")
 SERVER_PREFIX = f"{SERVER_PROTOCOL}://{SERVER_NAME}"
 SITE_NAME = env.str("SITE_NAME", SERVER_NAME)
 SITE_ID = 1
+if SERVER_PROTOCOL == 'https':
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_HOST = SERVER_NAME
+    SECURE_SSL_REDIRECT = True
+
 ANALYTICS_GTAG = env.get("ANALYTICS_GTAG")
 
 DEBUG = env.bool("DJANGO_DEBUG", False)
@@ -38,6 +44,7 @@ DEBUG_TOOLBAR = env.bool("DJANGO_DEBUG_TOOLBAR", False)
 LOGGING_PATH = env.get("LOGGING_PATH")
 LOGGING_LEVEL = env.str("LOGGING_LEVEL", "INFO")
 
+X_FRAME_OPTIONS = "DENY"
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 ADMINS = [(email, email) for email in env.list("DJANGO_ADMINS")]
 
@@ -190,7 +197,7 @@ MEDIA_ROOT = "/var/app/media/"
 
 MEDIA_URL = "media/"
 
-X_FRAME_OPTIONS = "ORIGIN"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/stable/ref/settings/#default-auto-field
@@ -239,10 +246,15 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
+        'mail_admins': {
+            "level": "WARNING",
+            "class": "django.utils.log.AdminEmailHandler",
+            "include_html": True,
+        },
     },
     "root": {
         "level": "DEBUG",
-        "handlers": ["console"],
+        "handlers": ["console", "mail_admins"],
     },
     "loggers": {
         "django.request": {
@@ -301,36 +313,40 @@ if DEBUG_SQL:
 
     from sqlparse import format as sqlformat
 
-    class AddStackLoggingFilter:
+    class SQLFormatFilter:
         def __init__(self, skip=(), limit=5):
             self.skip = [__name__, "logging"]
             self.skip.extend(skip)
             self.limit = limit
 
         def filter(self, record):
-            if not hasattr(record, "stack_patched"):
+            if getattr(record, "__sql_format_patched__", False):
                 frame = sys._getframe(1)
-                while any(skip for skip in self.skip if frame.f_globals.get("__name__", "").startswith(skip)):
-                    frame = frame.f_back
-                stack = "".join(f"\33[1;30m{line}\33[0m" for line in format_stack(f=frame, limit=self.limit))
+                if self.limit:
+                    while any(skip for skip in self.skip if frame.f_globals.get("__name__", "").startswith(skip)):
+                        frame = frame.f_back
+                    stack = "".join(f"\33[1;30m{line}\33[0m" for line in format_stack(f=frame, limit=self.limit))
+                    stack = f"\n \33[1;32m-- stack: \n{stack}\33[0m"
+                else:
+                    stack = ""
                 if hasattr(record, "duration") and hasattr(record, "sql") and hasattr(record, "params"):
                     sql = "\n  ".join(f"\33[33m{line}\33[0m" for line in sqlformat(record.sql or "", reindent=True).strip().splitlines())
                     record.msg = (
                         f"\33[31mduration: \33[{'' if record.duration < 0.1 else '1;'}31m{record.duration:.4f} secs\33[0m, "
                         f"\33[33marguments: \33[1{';33' if record.params else ''}m{record.params}\33[0m"
-                        f"\n  {sql}\n \33[1;32m-- stack: \n{stack}\33[0m"
+                        f"\n  {sql}{stack}"
                     )
                     record.args = ()
-                else:
-                    record.msg += f"\n \33[1;32m-- stack: \n{stack}\33[0m"
+                elif stack:
+                    record.msg += stack
 
-                record.stack_patched = True
+                record.__sql_format_patched__ = True
             return True
 
     LOGGING["loggers"]["django.db.backends"]["level"] = "DEBUG"
     LOGGING["loggers"]["django.db.backends"]["filters"] = ["add_stack"]
-    LOGGING["filters"]["add_stack"] = {
-        "()": AddStackLoggingFilter,
+    LOGGING["filters"]["sql_format"] = {
+        "()": SQLFormatFilter,
         "skip": ("django.db", "__main__"),
         "limit": DEBUG_SQL_LIMIT,
     }
