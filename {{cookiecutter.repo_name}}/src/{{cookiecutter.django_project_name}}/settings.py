@@ -149,6 +149,15 @@ CACHES = {
     }
 }
 
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/stable/ref/settings/#auth-password-validators
 
