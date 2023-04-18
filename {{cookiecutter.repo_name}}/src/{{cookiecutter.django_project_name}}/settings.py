@@ -29,7 +29,7 @@ SERVER_PROTOCOL = env.str("SERVER_PROTOCOL", "https")
 SERVER_PREFIX = f"{SERVER_PROTOCOL}://{SERVER_NAME}"
 SITE_NAME = env.str("SITE_NAME", SERVER_NAME)
 SITE_ID = 1
-if SERVER_PROTOCOL == 'https':
+if SERVER_PROTOCOL == "https":
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_SSL_HOST = SERVER_NAME
@@ -206,8 +206,6 @@ MEDIA_ROOT = "/var/app/media/"
 
 MEDIA_URL = "media/"
 
-
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/stable/ref/settings/#default-auto-field
 
@@ -255,7 +253,7 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
-        'mail_admins': {
+        "mail_admins": {
             "level": "WARNING",
             "class": "django.utils.log.AdminEmailHandler",
             "include_html": True,
