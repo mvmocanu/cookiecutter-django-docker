@@ -6,7 +6,7 @@ def get(key):
     return os.environ.get(key)
 
 
-def str(key, default=Ellipsis):  # noqa: A001
+def str(key, default=Ellipsis):
     if default is Ellipsis:
         if bool("__strict_env__", True):
             return os.environ[key]
@@ -16,7 +16,7 @@ def str(key, default=Ellipsis):  # noqa: A001
         return os.environ.get(key, default)
 
 
-def list(key, default=None, separator=","):  # noqa: A001
+def list(key, default=None, separator=","):
     value = str(key, default)
     if value is None:
         return []
@@ -24,11 +24,11 @@ def list(key, default=None, separator=","):  # noqa: A001
         return value.split(separator)
 
 
-def int(key, default):  # noqa: A001
+def int(key, default):
     return builtins.int(str(key, default))
 
 
-def bool(key, default):  # noqa: A001
+def bool(key, default):
     if key in os.environ:
         return os.environ.get(key).lower() in ("yes", "true", "y", "1")
     else:

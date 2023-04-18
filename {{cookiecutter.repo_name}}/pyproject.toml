@@ -1,29 +1,37 @@
+[tool.ruff.per-file-ignores]
+"src/tests/*" = ["DTZ", "S", "B"]
+"*/test_*" = ["DTZ", "S", "B"]
+
 [tool.ruff]
 extend-exclude = ["static", "ci/templates"]
 ignore = [
-    "A002", # flake8-builtins builtin-argument-shadowing
-    "A003", # flake8-builtins builtin-attribute-shadowing
-    "ANN", # flake8-annotations
-    "ARG", # flake8-unused-arguments
-    "BLE", # flake8-blind-except
-    "COM", # flake8-commas
-    "D", # pydocstyle
-    "EM", # flake8-errmsg
-    "ERA", # eradicate
-    "FBT", # flake8-boolean-trap
-    "PLR", # Pylint Refactor
-    "PLW", # Pylint Warning
-    "RET", # flake8-return
-    "RUF001", # Ruff-specific rules ambiguous-unicode-character-string
+    "RUF001", # ruff-specific rules ambiguous-unicode-character-string
     "S101", # flake8-bandit assert
-    "SLF", # flake8-self
-    "T20", # flake8-print
-    "TCH", # flake8-type-checking
-    "TID", # flake8-tidy-imports
-    "TRY", # tryceratops
+    "S308", # flake8-bandit suspicious-mark-safe-usage
+    "E501", # pycodestyle line-too-long
 ]
 line-length = 140
-select = ["ALL"]
+select = [
+    "B", # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "DTZ", # flake8-datetimez
+    "E", # pycodestyle errors
+    "EXE", # flake8-executable
+    "F", # pyflakes
+    "I", # isort
+    "INT", # flake8-gettext
+    "PIE", # flake8-pie
+    "PLC", # pylint convention
+    "PLE", # pylint errors
+    "PT", # flake8-pytest-style
+    "PTH", # flake8-use-pathlib
+    "Q", # flake8-quotes
+    "RSE", # flake8-raise
+    "RUF", # ruff-specific rules
+    "S", # flake8-bandit
+    "UP", # pyupgrade
+    "W", # pycodestyle warnings
+]
 src = ["src", "tests"]
 target-version = "py310"
 
