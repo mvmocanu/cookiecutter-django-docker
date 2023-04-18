@@ -13,8 +13,7 @@ sentry-sdk
 tzdata
 
 # connectors
---no-binary=psycopg2
-psycopg2
+psycopg[c]
 pylibmc
 
 # container tooling
