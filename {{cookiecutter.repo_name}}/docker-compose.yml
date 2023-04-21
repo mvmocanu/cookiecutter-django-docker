@@ -21,12 +21,17 @@ x-python:
   env_file:
     - .env
   tty: false
+  deploy:
+    resources:
+      limits:
+        memory: $MEMORY_LIMIT
   volumes:
     - .:/app
     - ./.home:/root
     - ./.home:/home/app
     - ./.home:/var/app
     - ./.home/etc:/etc/app
+    - ./.home/logs:/app/logs
 services:
   pg:
     build:
