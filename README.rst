@@ -12,6 +12,7 @@ What is included?
 * LetsEncrypt_ setup with Nginx_ and uWSGI_.
 * Setup for testing using Pytest_.
 * Reloader (container that restarts other containers when files change, for development).
+* Ansible deployment playbooks (that install Docker on the target machines and run your project with Compose).
 
 Generating the project
 ----------------------
