@@ -24,7 +24,7 @@ x-python:
   deploy:
     resources:
       limits:
-        memory: $MEMORY_LIMIT
+        memory: ${MEMORY_LIMIT:-4G}
   volumes:
     - .:/app
     - ./.home:/root
