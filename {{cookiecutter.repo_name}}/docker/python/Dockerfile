@@ -26,7 +26,7 @@ ARG CPUCOUNT=1
 RUN --mount=type=cache,target=/root/.cache set -x \
  && mkdir /deps \
  && if [ -n "$REQUIREMENTS" ] \
-  ; then python -mpip wheel --wheel-dir=/deps/wheels -r requirements/$REQUIREMENTS.txt \
+  ; then python -mpip wheel --no-deps --require-hashes --wheel-dir=/deps/wheels --requirement=requirements/$REQUIREMENTS.txt \
  && ls -al /deps/wheels \
   ; else echo 'No REQUIREMENTS defined!' \
   ; fi
