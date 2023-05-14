@@ -6,11 +6,12 @@ django-admin-utils
 django-crispy-forms
 django-pylibmc
 django-settings-export
+httpx
 lazy_object_proxy
 python-dateutil
-requests
 sentry-sdk
 tzdata
+
 
 # connectors
 psycopg[c]
