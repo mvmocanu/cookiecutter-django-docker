@@ -63,14 +63,21 @@ RUN apt-get update \
         dumb-init \
         libpq5={{ cookiecutter.postgresql_version.split('.')|first }}.* postgresql-client-{{ cookiecutter.postgresql_version.split('.')|first }} \
         python3-dbg python3-distutils python3-distutils-extra \
+        python3-gdal gdal-bin \
         python-is-python3 \
         libmemcached11 libpcre3 \
         sudo ca-certificates \
         nginx \
         rsync \
-        gdal-bin python3-gdal
+        tzdata
 
 ARG TZ={{ cookiecutter.timezone }}
+
+# Force a sensible default encoding (affects terminal output and filename handling).
+# See: https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/uwsgi/
+# Note that for en_US.UTF-8 you need to install and compile locales, seems overkill...
+ENV LANG=C.UTF-8
+
 ENV TZ=$TZ
 RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
  && dpkg-reconfigure -f noninteractive tzdata
