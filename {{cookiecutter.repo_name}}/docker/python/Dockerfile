@@ -67,6 +67,7 @@ RUN apt-get update \
         libmemcached11 libpcre3 \
         sudo ca-certificates \
         nginx \
+        rsync \
         gdal-bin python3-gdal
 
 ARG TZ={{ cookiecutter.timezone }}
@@ -107,6 +108,7 @@ ENV PYTHONFAULTHANDLER=x
 
 ARG DJANGO_SETTINGS_MODULE
 ENV DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+
 ARG DJANGO_SECRET_KEY="n/a"
 ARG SERVER_NAME="localhost"
 
