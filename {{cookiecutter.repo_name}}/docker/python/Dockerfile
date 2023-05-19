@@ -55,10 +55,9 @@ RUN apt-get update \
  && curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg \
  && apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        tzdata \
         strace ltrace gdb lsof locate net-tools htop iputils-ping dnsutils \
-        nano vim tree less telnet \
-        socat byobu \
+        nano vim tree less telnet socat byobu \
+        rsync moreutils \
         graphviz \
         dumb-init \
         libpq5={{ cookiecutter.postgresql_version.split('.')|first }}.* postgresql-client-{{ cookiecutter.postgresql_version.split('.')|first }} \
@@ -99,7 +98,7 @@ RUN groupadd --gid $GROUP_ID app \
  && useradd --uid $USER_ID --gid $GROUP_ID --shell /bin/bash --create-home app \
  && echo "app ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
 
-RUN mkdir -p /app /var/app/logs /var/app/static /var/app/run /etc/app \
+RUN mkdir -p /app /var/app/logs /var/app/static /var/app/run /etc/app /etc/app-defaults /etc/app-latest \
  && chown -R app:app /app /var/app/logs /var/app/run
 
 ENV PYTHONPATH=/app/src
@@ -122,24 +121,22 @@ ARG SERVER_NAME="localhost"
 WORKDIR /app
 
 COPY docker/python/entrypoint.sh /
-COPY docker/python/uwsgi.ini /etc/app/
+COPY docker/python/uwsgi.ini /etc/app-latest
 {%- if cookiecutter.worker == "rq" %}
-COPY docker/python/worker.ini /etc/app/
+COPY docker/python/worker.ini /etc/app-latest
 {%- endif %}
-COPY docker/python/nginx.conf /etc/app/
-COPY docker/python/nginx.site /tmp/
-COPY docker/python/yacron.yml /etc/app/
-COPY --from=certs /certs/* /etc/app
+COPY docker/python/nginx.conf /etc/app-latest
+COPY docker/python/nginx.site /etc/app-latest
+COPY docker/python/yacron.yml /etc/app-latest
 
-ADD https://ssl-config.mozilla.org/ffdhe2048.txt /etc/app/dhparam
+COPY --from=certs /certs/* /etc/app-defaults
 
 ARG SERVER_NAME="localhost"
-RUN envsubst \$SERVER_NAME < /tmp/nginx.site > /etc/app/nginx.site
-RUN cp /etc/app/fullchain.pem /etc/app/chain.pem \
+RUN envsubst \$SERVER_NAME < /etc/app-latest/nginx.site | sponge /etc/app-latest/nginx.site
+RUN cp /etc/app-defaults/fullchain.pem /etc/app-defaults/chain.pem \
  && ln -sf /etc/app/nginx.conf /etc/nginx/nginx.conf \
- && cp /etc/nginx/mime.types /etc/app \
- && chmod -R go+r /etc/app \
- && cp -r /etc/app /etc/app-defaults
+ && cp /etc/nginx/mime.types /etc/app-latest \
+ && chmod -R go+r /etc/app
 
 ARG DJANGO_COLLECTSTATIC
 RUN set -x \
