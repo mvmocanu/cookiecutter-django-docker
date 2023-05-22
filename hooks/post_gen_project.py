@@ -77,8 +77,8 @@ if __name__ == "__main__":
         note('+ cp .env-linux-osx .env')
         shutil.copy('.env-linux-osx', '.env')
 
-    note('+ docker lock generate --update-existing-digests')
-    subprocess.check_call(['docker', 'lock', 'generate', '--update-existing-digests'])
+    note('+ docker lock generate --update-existing-digests --dockerfile-recursive')
+    subprocess.check_call(['docker', 'lock', 'generate', '--update-existing-digests', '--dockerfile-recursive'])
     note('+ docker lock rewrite --tempdir .')
     subprocess.check_call(['docker', 'lock', 'rewrite', '--tempdir', '.'])
     note('+ docker lock verify --update-existing-digests')
