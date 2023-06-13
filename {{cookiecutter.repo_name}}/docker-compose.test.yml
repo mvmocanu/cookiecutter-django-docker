@@ -5,7 +5,7 @@ services:
     build:
       context: docker/requirements
     volumes:
-      - $PWD/requirements:/requirements
+      - ./requirements:/requirements
     entrypoint: /entrypoint.sh
     env_file:
       - .env-test
@@ -16,6 +16,7 @@ services:
       args:
         REQUIREMENTS: test
         DJANGO_SETTINGS_MODULE: '{{ cookiecutter.django_project_name }}.settings_test'
+        PYTHONPATH: /app/src:/app/tests
     entrypoint: /app/tests/entrypoint.sh
     env_file:
       - .env-test
@@ -32,8 +33,8 @@ services:
     depends_on:
       - pg
     volumes:
-      - $PWD:/app
-      - $PWD/.home:/home/app
+      - ./:/app
+      - ./.home:/home/app
   pg:
     build:
       context: docker/postgres
