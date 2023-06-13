@@ -67,7 +67,6 @@ RUN apt-get update \
         libmemcached11 libpcre3 \
         sudo ca-certificates \
         nginx \
-        rsync \
         tzdata
 
 ARG TZ={{ cookiecutter.timezone }}
