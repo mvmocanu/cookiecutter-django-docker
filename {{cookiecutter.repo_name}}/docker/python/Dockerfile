@@ -16,21 +16,27 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_rel
         libmemcached-dev zlib1g-dev libpcre3-dev \
         build-essential git sudo ca-certificates
 
-RUN bash -o pipefail -c "curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | \
-    python - --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}"
+RUN <<EOF bash
+    set -euxo pipefail
+    curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - \
+        --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}"
+EOF
 
 # This intents to be the sole Dockerfile for the project so allow building variants with different or no dependencies.
 COPY requirements/*.txt /requirements/
 ARG REQUIREMENTS
 ARG CPUCOUNT=1
-RUN --mount=type=cache,target=/root/.cache set -x \
- && mkdir /deps \
- && if [ -n "$REQUIREMENTS" ] \
-  ; then python -mpip wheel --no-deps --require-hashes --wheel-dir=/deps/wheels --requirement=requirements/$REQUIREMENTS.txt \
- && ls -al /deps/wheels \
-  ; else echo 'No REQUIREMENTS defined!' \
-  ; fi
-
+RUN --mount=type=cache,target=/root/.cache <<EOF bash
+    set -eux
+    mkdir /deps
+    if [[ -n "$REQUIREMENTS" ]]; then
+        python -mpip wheel --no-deps --require-hashes --wheel-dir=/deps/wheels --requirement=requirements/$REQUIREMENTS.txt
+        ls -al /deps/wheels
+    else
+        echo 'No REQUIREMENTS defined!'
+        exit 1
+    fi
+EOF
 
 ##################################
 ##################################
@@ -79,16 +85,21 @@ ENV LANG=C.UTF-8
 ENV TZ=$TZ
 RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
  && dpkg-reconfigure -f noninteractive tzdata
+RUN <<EOF bash
+    set -euxo pipefail
+    curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - \
+        --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}"
+EOF
 
-RUN bash -o pipefail -c "curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | \
-    python - --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}"
-
-RUN --mount=type=bind,from=deps,src=/deps,target=/deps set -x \
- && if [ -e /deps/wheels ] \
-  ; then pip install --force-reinstall --ignore-installed --upgrade --no-index --no-deps /deps/wheels/* \
-  ; else echo 'No wheels built!' \
-  ; fi
-
+RUN --mount=type=bind,from=deps,src=/deps,target=/deps <<EOF bash
+    set -eux
+    if [[ -e /deps/wheels ]]; then
+        pip install --force-reinstall --ignore-installed --upgrade --no-index --no-deps /deps/wheels/*
+    else
+        echo 'No wheels built!'
+        exit 1
+    fi
+EOF
 # Adds a new user named python and add it to the list of sudoers. Will be able to call sudo without the password.
 # This is more geared to development (eg: match user's UID) than production (where you shouln't need any sudo/home).
 ARG USER_ID=1000
@@ -101,8 +112,13 @@ RUN mkdir -p /app /var/app/logs /var/app/static /var/app/run /etc/app /etc/app-d
  && chown -R app:app /app /var/app/logs /var/app/run
 
 ENV PYTHONPATH=/app/src
-RUN echo /app/src > $(python -c 'print(__import__("sysconfig").get_path("purelib"))')/app.pth
-
+# Using 'EOF' instead of EOF to prevent substitutions on $
+RUN <<'EOF' bash
+    set -eux
+    pth_location=$(python -c 'print(__import__("sysconfig").get_path("purelib"))')
+    mkdir -p $pth_location
+    echo /app/src > $pth_location/app.pth
+EOF
 RUN ln -sf /proc/self/fd/2 /var/app/logs/error.log \
  && ln -sf /proc/self/fd/1 /var/app/logs/access.log
 
@@ -138,7 +154,9 @@ RUN cp /etc/app-defaults/fullchain.pem /etc/app-defaults/chain.pem \
  && chmod -R go+r /etc/app
 
 ARG DJANGO_COLLECTSTATIC
-RUN set -x \
- && if [ -n "$DJANGO_COLLECTSTATIC" ] \
-  ; then __strict_env__=false django-admin collectstatic --noinput --clear -v0 \
-  ; fi
+RUN <<EOF bash
+    set -eux
+    if [[ -n "$DJANGO_COLLECTSTATIC" ]]; then
+        __strict_env__=false django-admin collectstatic --noinput --clear -v0
+    fi
+EOF

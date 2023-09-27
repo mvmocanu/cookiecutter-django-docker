@@ -18,8 +18,11 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_rel
         libmemcached-dev zlib1g-dev libpcre3-dev \
         build-essential git sudo ca-certificates
 
-RUN bash -o pipefail -c "curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | \
-    python - --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }} pip-tools=={{ cookiecutter.pip_tools_version }}"
+RUN <<EOF bash
+    set -euxo pipefail
+    curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - \
+        --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }} pip-tools={{ cookiecutter.piptools_version }}"
+EOF
 
 ARG CPUCOUNT=1
 ARG USER_ID=1000
