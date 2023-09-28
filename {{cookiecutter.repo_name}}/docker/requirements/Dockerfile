@@ -24,7 +24,7 @@ RUN <<EOF bash
         --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }} pip-tools={{ cookiecutter.piptools_version }}"
 EOF
 
-ARG CPUCOUNT=1
+ENV CPUCOUNT=1
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 RUN groupadd --gid $GROUP_ID app \
