@@ -18,8 +18,8 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_rel
 
 RUN <<EOF bash
     set -euxo pipefail
-    curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - \
-        --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}"
+    curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - --no-cache --disable-pip-version-check --upgrade \
+    pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}"
 EOF
 
 # This intents to be the sole Dockerfile for the project so allow building variants with different or no dependencies.
@@ -87,8 +87,8 @@ RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
  && dpkg-reconfigure -f noninteractive tzdata
 RUN <<EOF bash
     set -euxo pipefail
-    curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - \
-        --no-cache --disable-pip-version-check --upgrade pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}"
+    curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - --no-cache --disable-pip-version-check --upgrade \
+    pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}"
 EOF
 
 RUN --mount=type=bind,from=deps,src=/deps,target=/deps <<EOF bash
