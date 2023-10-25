@@ -31,7 +31,7 @@
   "timezone": "Europe/Bucharest",
   "project_version": "0.1.0",
   "dockerfile_version": "1.4",
-  "pip_version": "23.2.1",
+  "pip_version": "23.3.1",
   "pip_tools_version": "7.3.0",
   "setuptools_version": "68.2.2",
   "docker_compose_version": "3.8",
