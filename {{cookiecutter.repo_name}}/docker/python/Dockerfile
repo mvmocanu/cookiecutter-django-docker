@@ -3,10 +3,14 @@ FROM buildpack-deps:{{ cookiecutter.ubuntu_version }}-scm as deps
 
 # DEBIAN_FRONTEND=noninteractive exists to prevent tzdata going nuts.
 # Maybe dpkg incorrectly detects interactive on buildkit containers?
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list \
- && curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg \
- && apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN <<EOF bash
+    set -euxo pipefail
+    export DEBIAN_FRONTEND=noninteractive
+
+    echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list
+    curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
+    apt-get update
+    apt-get install -y --no-install-recommends \
         python3-dev python3-distutils-extra \
         python-is-python3 \
         libpq-dev={{ cookiecutter.postgresql_version.split('.')|first }}.* libpq5={{ cookiecutter.postgresql_version.split('.')|first }}.* \
@@ -15,7 +19,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_rel
         libwebp-dev tcl-dev tk-dev libffi-dev \
         libmemcached-dev zlib1g-dev libpcre3-dev \
         build-essential git sudo ca-certificates
-
+EOF
 RUN <<EOF bash
     set -euxo pipefail
     curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - --no-cache --disable-pip-version-check --upgrade \
@@ -54,13 +58,19 @@ FROM ubuntu:{{ cookiecutter.ubuntu_version }}
 #################
 RUN test -e /etc/apt/apt.conf.d/docker-clean # sanity check
 
-RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        curl software-properties-common gpg-agent \
- && echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list \
- && curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg \
- && apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN <<EOF bash
+    set -euxo pipefail
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        curl software-properties-common gpg-agent
+    echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list
+    echo "deb http://nginx.org/packages/mainline/ubuntu/ {{ cookiecutter.ubuntu_release }} nginx" > /etc/apt/sources.list.d/nginx.list
+    curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
+    curl http://nginx.org/keys/nginx_signing.key | gpg --dearmor > /etc/apt/trusted.gpg.d/nginx.org.gpg
+    apt-get update
+    apt-get install -y --no-install-recommends \
         strace ltrace gdb lsof locate net-tools htop iputils-ping dnsutils \
         nano vim tree less telnet socat byobu \
         rsync moreutils \
@@ -74,6 +84,7 @@ RUN apt-get update \
         sudo ca-certificates \
         nginx \
         tzdata
+EOF
 
 ARG TZ={{ cookiecutter.timezone }}
 
@@ -106,7 +117,7 @@ ARG USER_ID=1000
 ARG GROUP_ID=1000
 RUN groupadd --gid $GROUP_ID app \
  && useradd --uid $USER_ID --gid $GROUP_ID --shell /bin/bash --create-home app \
- && echo "app ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
+ && echo "app ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 RUN mkdir -p /app /var/app/logs /var/app/static /var/app/run /etc/app /etc/app-defaults /etc/app-latest \
  && chown -R app:app /app /var/app/logs /var/app/run
@@ -147,7 +158,10 @@ COPY docker/python/yacron.yml /etc/app-latest
 COPY --from=certs /certs/* /etc/app-defaults
 
 ARG SERVER_NAME="localhost"
-RUN envsubst \$SERVER_NAME < /etc/app-latest/nginx.site | sponge /etc/app-latest/nginx.site
+RUN <<EOF bash
+    set -euxo pipefail
+    envsubst '\$SERVER_NAME' < /etc/app-latest/nginx.site | sponge /etc/app-latest/nginx.site
+EOF
 RUN cp /etc/app-defaults/fullchain.pem /etc/app-defaults/chain.pem \
  && ln -sf /etc/app/nginx.conf /etc/nginx/nginx.conf \
  && cp /etc/nginx/mime.types /etc/app-latest \

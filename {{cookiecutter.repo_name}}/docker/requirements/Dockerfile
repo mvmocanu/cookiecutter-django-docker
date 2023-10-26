@@ -5,10 +5,14 @@ ARG TZ=UTC
 
 # DEBIAN_FRONTEND=noninteractive exists to prevent tzdata going nuts.
 # Maybe dpkg incorrectly detects interactive on buildkit containers?
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list \
- && curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg \
- && apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN <<EOF bash
+    set -euxo pipefail
+    export DEBIAN_FRONTEND=noninteractive
+
+    echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list \
+    curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
+    apt-get update
+    apt-get install -y --no-install-recommends \
         python3-dev python3-distutils-extra \
         python-is-python3 \
         libpq-dev={{ cookiecutter.postgresql_version.split('.')|first }}.* libpq5={{ cookiecutter.postgresql_version.split('.')|first }}.* \
@@ -17,6 +21,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_rel
         libwebp-dev tcl-dev tk-dev libffi-dev \
         libmemcached-dev zlib1g-dev libpcre3-dev \
         build-essential git sudo ca-certificates
+EOF
 
 RUN <<EOF bash
     set -euxo pipefail
