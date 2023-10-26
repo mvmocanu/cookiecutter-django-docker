@@ -9,6 +9,7 @@ x-python:
       REQUIREMENTS: base
       DJANGO_SETTINGS_MODULE:
       DJANGO_COLLECTSTATIC: x
+      SERVER_NAME:
   environment:
     PYTHONHUNTER:
     PYTHONHUNTERCONFIG:

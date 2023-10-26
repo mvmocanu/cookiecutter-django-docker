@@ -1,0 +1,91 @@
+version: '{{ cookiecutter.docker_compose_version }}'
+{% raw %}
+x-python:
+  &python
+  image: {{ registry_host }}/{{ service_name }}-python:{{ app_version }}
+  env_file:
+    - /services/{{ service_name }}/.env
+  volumes:
+    - /services/{{ service_name }}/static:/var/app/static
+    - /services/{{ service_name }}/logs:/var/app/logs
+    - /services/{{ service_name }}/run:/var/app/run
+    - /services/{{ service_name }}/etc:/etc/app
+  restart: unless-stopped
+  depends_on:
+    - pg
+    - mc
+{%- endraw %}
+{%- if cookiecutter.worker != 'none' %}
+    - redis
+{%- endif %}
+  entrypoint: [ '/entrypoint.sh' ]
+{% raw %}
+services:
+  nginx:
+    image: {{ registry_host }}/{{ service_name }}-nginx:{{ app_version }}
+    restart: always
+    ports: ['80:80', '443:443']
+    volumes:
+      - /services/nginx/etc:/etc/letsencrypt
+      - /services/nginx/logs:/var/log/letsencrypt
+      - /services/nginx/logs:/var/app/logs
+      - /services/{{ service_name }}/static:/shared/{{ server_name }}/static
+      - /services/{{ service_name }}/etc:/shared/{{ server_name }}/etc
+      - /services/{{ service_name }}/run:/shared/{{ server_name }}/run
+      - /services/{{ service_name }}/.well-known:/shared/{{ server_name }}/.well-known
+    entrypoint: [ '/entrypoint.sh' ]
+    command: [ 'nginx' ]
+  {{ service_name }}:
+    <<: *python
+
+    command: [ 'uwsgi', '--ini', '/etc/app/uwsgi.ini' ]
+{%- endraw %}
+{%- if cookiecutter.deploy_worker %}
+{%- raw %}
+  {{ service_name }}_worker:
+    <<: *python
+{%- endraw %}
+{%- if cookiecutter.worker == 'rq' %}
+    command: [ 'pysu', 'app', '--', 'django-admin', 'rqworker' ]
+    deploy:
+      replicas: 2
+{%- elif cookiecutter.worker == 'celery' %}
+    command: [ 'pysu', 'app', '--', 'celery', '-A', '{{ cookiecutter.django_project_name }}', 'worker' ]
+{%- endif %}
+{%- endif %}
+{%- if cookiecutter.deploy_cron %}
+{%- raw %}
+  {{ service_name }}_cron:
+    <<: *python
+    command: [ 'pysu', 'app', '--', 'yacron', '--config=/etc/app/yacron.yml' ]
+{%- endraw %}
+{%- endif %}
+  pg:
+    image: {% raw %}{{ registry_host }}/{{ service_name }}-pg:{{ app_version }}{% endraw %}
+    restart: unless-stopped
+    command: [
+      'postgres',
+      '-c', 'log_lock_waits=true',
+      '-c', 'log_min_error_statement=WARNING',
+      '-c', 'log_min_duration_statement=1s',
+      '-c', 'log_destination=stderr',
+      '-c', 'logging_collector=on',
+      '-c', 'log_directory=/var/log/postgresql',
+      '-c', 'log_filename=pg-%Y-%m-%d.log',
+      '-c', 'log_truncate_on_rotation=off',
+      '-c', 'log_rotation_age=1d',
+      '-c', 'log_rotation_size=0',
+    ]
+    shm_size: 256MB
+    volumes:
+      - /services/pg/data:/var/lib/postgresql/data
+      - /services/pg/logs:/var/log/postgresql
+    environment:
+      PGUSER: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_EXTRAS:
+  mc:
+    image: memcached:{{ cookiecutter.memcached_version }}
+  redis:
+    image: redis:{{ cookiecutter.redis_version }}

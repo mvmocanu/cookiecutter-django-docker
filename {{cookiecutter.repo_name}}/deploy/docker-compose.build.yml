@@ -1,0 +1,25 @@
+version: '{{ cookiecutter.docker_compose_version }}'
+
+services:
+  nginx:
+    image: ${registry_host}/${service_name}-nginx:${app_version}
+    build:
+      context: ..
+      dockerfile: docker/python/Dockerfile
+      args:
+        REQUIREMENTS: nginx
+  python:
+    image: ${registry_host}/${service_name}-python:${app_version}
+    build:
+      context: ..
+      dockerfile: docker/python/Dockerfile
+      args:
+        REQUIREMENTS: base
+        DJANGO_SETTINGS_MODULE: ${django_settings_module}
+        USER_ID: ${uid}
+        GROUP_ID: ${uid}
+        SERVER_NAME: ${server_name}
+  pg:
+    image: ${registry_host}/${service_name}-pg:${app_version}
+    build:
+      context: ../../docker/postgres

@@ -19,7 +19,10 @@
         - /services/nginx/logs
         - /services/nginx/etc
         - /services/nginx/etc/renewal-hooks/deploy
-        - '{{ []|zip_longest(services, fillvalue="/services/")|map("join")|product(["/logs", "/emails", "/etc", "/.well-known"])|map("join")|list }}'
+        - /services/{{ service_name }}/logs
+        - /services/{{ service_name }}/emails
+        - /services/{{ service_name }}/etc
+        - /services/{{ service_name }}/.well-known
         - /services/pg/logs
         - /services/pg/data
     - name: 'making dirs'
@@ -34,16 +37,15 @@
         mode: 0777
       with_items:
         - nginx
-        - '{{ services|list }}'
+        - '{{ service_name }}'
         - pg
     - name: 'copy .env'
       tags: [env]
       copy:
         src: '{{ inventory_dir }}/.env'
-        dest: '/services/{{ item }}/.env'
+        dest: '/services/{{ service_name }}/.env'
         backup: yes
-      loop: '{{ services|list }}'
-      register: envfiles
+      register: envfile
     - name: logrotate config
       copy:
         dest: '/etc/logrotate.d/{{ item }}'
@@ -61,7 +63,7 @@
           }
       with_items:
         - nginx
-        - '{{ services|list }}'
+        - '{{ service_name }}'
         - pg
 - hosts: all
   tasks:
@@ -129,7 +131,7 @@
         dest: /services/deploy.log
         line: ===== {{ inventory_dir|basename }} setup @ {{ now() }} =====
     - name: update services after env update
-      when: envfiles.changed and compose_files
+      when: envfile.changed and compose_files
       tags: [env]
       shell:
         executable: /bin/bash

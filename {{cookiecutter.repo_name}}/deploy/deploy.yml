@@ -11,7 +11,7 @@
           version: '3.7'
           services: >
             {
-              "{{ compose_project_name }}": {
+              "{{ service_name }}": {
                 "image": "registry:2",
                 "ports": ["{{ registry_port }}:5000"],
                 "volumes": ["{{ playbook_dir }}/../.home/registry:/var/lib/registry"]
@@ -20,12 +20,14 @@
     - name: build and publish image
       command:
         chdir: ..
-        cmd: docker compose --file {{ inventory_dir }}/docker-compose.build.yml {{ item }}
+        cmd: docker compose --file {{ playbook_dir }}/docker-compose.build.yml {{ item }}
       environment:
         app_version: '{{ app_version }}'
-        registry_host: '{{ registry_host }}'
-        compose_project_name: '{{ compose_project_name }}'
         django_settings_module: '{{ django_settings_module }}'
+        registry_host: '{{ registry_host }}'
+        server_name: '{{ server_name }}'
+        service_name: '{{ service_name }}'
+        uid: '{{ uid }}'
       loop:
         - build
         - push
@@ -39,7 +41,7 @@
         line: ===== {{ inventory_dir|basename }} deploy @ {{ now() }} =====
     - name: copy release docker-compose.yml
       template:
-        src: '{{ inventory_dir }}/docker-compose.release.yml'
+        src: '{{ playbook_dir }}/docker-compose.release.yml'
         dest: '/services/{{ compose_file }}'
     - name: get available compose files
       tags: [always]
@@ -72,17 +74,13 @@
         executable: /bin/bash
         cmd: |
           set -euxo pipefail
-          docker compose run --rm --no-TTY {{ item.key }} pysu app django-admin migrate --no-input
-      loop: '{{ services|dict2items }}'
-      when: item.value
+          docker compose run --rm --no-TTY {{ service_name }} pysu app django-admin migrate --no-input
     - name: run collectstatic
       shell:
         executable: /bin/bash
         cmd: |
           set -euxo pipefail
-          docker compose run --rm --no-TTY {{ item.key }} pysu app django-admin collectstatic --noinput --clear -v0
-      loop: '{{ services|dict2items }}'
-      when: item.value
+          docker compose run --rm --no-TTY {{ service_name }} pysu app django-admin collectstatic --noinput --clear -v0
     - name: restart services
       tags: [restart, never]
       shell:
@@ -91,7 +89,20 @@
           exec > >(tee -a /services/deploy.log) 2>&1
           set -euxo pipefail
           docker compose restart {{ item }}
-      loop: '{{ services|list }}'
+      loop:
+        - '{{ service_name }}'
+{%- endraw %}
+{%- if cookiecutter.deploy_worker %}
+{%- raw %}
+        - '{{ service_name }}_worker'
+{%- endraw %}
+{%- endif %}
+{%- if cookiecutter.deploy_cron %}
+{%- raw %}
+        - '{{ service_name }}_cron'
+{%- endraw %}
+{%- endif %}
+{%- raw %}
     - name: start/update services
       tags: [restart]
       shell:
@@ -118,5 +129,5 @@
         remove_orphans: yes
         definition:
           version: '3.7'
-          services: '{"{{ compose_project_name }}": {"image": "registry:2"}}'
+          services: '{"{{ service_name }}": {"image": "registry:2"}}'
 {%- endraw %}

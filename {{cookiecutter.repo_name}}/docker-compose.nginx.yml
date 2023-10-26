@@ -10,6 +10,7 @@ services:
       dockerfile: docker/python/Dockerfile
       args:
         REQUIREMENTS: nginx
+        SERVER_NAME:
     environment:
       SERVER_NAME:
       PYTHONHUNTER:
