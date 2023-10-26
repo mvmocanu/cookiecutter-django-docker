@@ -19,7 +19,7 @@
         - /services/nginx/logs
         - /services/nginx/etc
         - /services/nginx/etc/renewal-hooks/deploy
-        - '{{ []|zip_longest(services, fillvalue="/services/")|map("join", "")|product(["/logs", "/emails", "/etc", "/.well-known"])|map("join")|list }}'
+        - '{{ []|zip_longest(services, fillvalue="/services/")|map("join")|product(["/logs", "/emails", "/etc", "/.well-known"])|map("join")|list }}'
         - /services/pg/logs
         - /services/pg/data
     - name: 'making dirs'
