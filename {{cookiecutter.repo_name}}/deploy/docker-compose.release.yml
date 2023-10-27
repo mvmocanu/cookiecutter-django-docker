@@ -37,7 +37,6 @@ services:
     command: [ 'nginx' ]
   {{ service_name }}:
     <<: *python
-
     command: [ 'uwsgi', '--ini', '/etc/app/uwsgi.ini' ]
 {%- endraw %}
 {%- if cookiecutter.deploy_worker %}
