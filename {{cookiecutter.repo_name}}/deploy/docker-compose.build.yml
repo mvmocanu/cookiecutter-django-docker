@@ -22,4 +22,4 @@ services:
   pg:
     image: ${registry_host}/${service_name}-pg:${app_version}
     build:
-      context: ../../docker/postgres
+      context: ../docker/postgres
