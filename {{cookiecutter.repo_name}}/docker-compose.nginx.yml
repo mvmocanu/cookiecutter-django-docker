@@ -19,17 +19,20 @@ services:
       DJANGO_DEBUG_SQL:
       DJANGO_DEBUG_SQL_LIMIT:
       DJANGO_DEBUG_TOOLBAR:
-    env_file:
-      - .env
     tty: false
     volumes:
-      - ./.home:/shared/${SERVER_NAME}
-      - ./.home/nginx/etc:/etc/app
+      - ./.home/etc:/shared/${SERVER_NAME}/etc
+      - ./.home/etc:/etc/app
     depends_on:
       - web
     ports:
       - '80:80'
       - '443:443'
+    ulimits:
+      nproc: 16384
+      nofile:
+        soft: 65536
+        hard: 262144
     entrypoint: [ '/entrypoint.sh' ]
     command: [
       'holdup',
@@ -54,8 +57,12 @@ services:
       context: docker/reloader
     volumes:
       - .:/app
-      - ./.home:/var/app
       - /var/run/docker.sock:/var/run/docker.sock
+    ulimits:
+      nproc: 16384
+      nofile:
+        soft: 65536
+        hard: 262144
     environment:
       RELOADER_MONITOR:
       RELOADER_CONTAINERS:

@@ -26,13 +26,16 @@ x-python:
     resources:
       limits:
         memory: ${MEMORY_LIMIT:-4G}
+  ulimits:
+    nproc: 16384
+    nofile:
+      soft: 65536
+      hard: 262144
   volumes:
     - .:/app
     - ./.home:/root
     - ./.home:/home/app
-    - ./.home:/var/app
     - ./.home/etc:/etc/app
-    - ./.home/logs:/app/logs
 services:
   pg:
     build:

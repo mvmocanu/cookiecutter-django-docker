@@ -6,10 +6,10 @@ x-python:
   env_file:
     - /services/{{ service_name }}/.env
   volumes:
-    - /services/{{ service_name }}/static:/var/app/static
+    - /services/{{ service_name }}/etc:/etc/app
     - /services/{{ service_name }}/logs:/var/app/logs
     - /services/{{ service_name }}/run:/var/app/run
-    - /services/{{ service_name }}/etc:/etc/app
+    - /services/{{ service_name }}/static:/var/app/static
   restart: unless-stopped
   depends_on:
     - pg
@@ -35,9 +35,19 @@ services:
       - /services/{{ service_name }}/static:/shared/{{ server_name }}/static
       - /services/{{ service_name }}/.well-known:/shared/{{ server_name }}/.well-known
     entrypoint: [ '/entrypoint.sh' ]
+    ulimits:
+      nproc: 16384
+      nofile:
+        soft: 65536
+        hard: 262144
     command: [ 'nginx' ]
   {{ service_name }}:
     <<: *python
+    ulimits:
+      nproc: 16384
+      nofile:
+        soft: 65536
+        hard: 262144
     command: [ 'uwsgi', '--ini', '/etc/app/uwsgi.ini' ]
 {%- endraw %}
 {%- if cookiecutter.deploy_worker %}

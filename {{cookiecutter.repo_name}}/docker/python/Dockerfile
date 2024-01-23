@@ -119,7 +119,17 @@ RUN groupadd --gid $GROUP_ID app \
  && useradd --uid $USER_ID --gid $GROUP_ID --shell /bin/bash --create-home app \
  && echo "app ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
+ENV PYTHONUNBUFFERED=x
+ENV PYTHONFAULTHANDLER=x
+
+ARG DJANGO_SETTINGS_MODULE
+ENV DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+
+ARG DJANGO_SECRET_KEY="n/a"
+ARG SERVER_NAME="localhost"
+
 RUN mkdir -p /app /var/app/logs /var/app/static /var/app/run /etc/app /etc/app-defaults /etc/app-latest \
+             /shared/$SERVER_NAME/etc /shared/$SERVER_NAME/logs \
  && chown -R app:app /app /var/app/logs /var/app/run
 
 ENV PYTHONPATH=/app/src
@@ -131,18 +141,10 @@ RUN <<'EOF' bash
     echo /app/src > $pth_location/app.pth
 EOF
 RUN ln -sf /proc/self/fd/2 /var/app/logs/error.log \
- && ln -sf /proc/self/fd/1 /var/app/logs/access.log
+ && ln -sf /proc/self/fd/2 /shared/$SERVER_NAME/logs/error.log \
+ && ln -sf /proc/self/fd/1 /shared/$SERVER_NAME/logs/access.log
 
 COPY src /app/src
-
-ENV PYTHONUNBUFFERED=x
-ENV PYTHONFAULTHANDLER=x
-
-ARG DJANGO_SETTINGS_MODULE
-ENV DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
-
-ARG DJANGO_SECRET_KEY="n/a"
-ARG SERVER_NAME="localhost"
 
 WORKDIR /app
 
