@@ -52,7 +52,6 @@ services:
       '-c', 'log_min_duration_statement=1s',
     ]
     volumes:
-      - .:/app
       - ./.home:/root
 
   mc:
