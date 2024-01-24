@@ -22,6 +22,7 @@ services:
     tty: false
     volumes:
       - ./.home/etc:/shared/${SERVER_NAME}/etc
+      - ./.home/run:/shared/${SERVER_NAME}/run
       - ./.home/etc:/etc/app
     depends_on:
       - web
@@ -44,17 +45,23 @@ services:
     environment:
       DJANGO_DB_MIGRATE: x
       DJANGO_COLLECTSTATIC: x
+    volumes:
+      - ./.home/run:/var/app/run
+    depends_on:
+      - pg
+    stop_signal: SIGTERM
     command: [
       'uwsgi',
       '--ini', '/etc/app/uwsgi.ini',
       '--processes', '4',
     ]
-    depends_on:
-      - pg
-    stop_signal: SIGTERM
   reloader:
     build:
       context: docker/reloader
+    environment:
+      RELOADER_MONITOR:
+      RELOADER_CONTAINERS:
+      COMPOSE_PROJECT_NAME:
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -63,7 +70,3 @@ services:
       nofile:
         soft: 65536
         hard: 262144
-    environment:
-      RELOADER_MONITOR:
-      RELOADER_CONTAINERS:
-      COMPOSE_PROJECT_NAME:
