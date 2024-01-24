@@ -3,6 +3,3 @@ certbot
 certbot-nginx
 pysu
 holdup
-
-ruamel.yaml
-yacron
