@@ -77,12 +77,14 @@ if __name__ == "__main__":
         note('+ cp .env-linux-osx .env')
         shutil.copy('.env-linux-osx', '.env')
 
+{%- if cookiecutter.docker_lock %}
     note('+ docker lock generate --update-existing-digests --dockerfile-recursive --composefiles=docker-compose.yml,docker-compose.test.yml')
     subprocess.check_call(['docker', 'lock', 'generate', '--update-existing-digests', '--dockerfile-recursive', '--composefiles=docker-compose.yml,docker-compose.test.yml'])
     note('+ docker lock rewrite --tempdir .')
     subprocess.check_call(['docker', 'lock', 'rewrite', '--tempdir', '.'])
     note('+ docker lock verify --update-existing-digests')
     subprocess.check_call(['docker', 'lock', 'verify', '--update-existing-digests'])
+{%- endif %}
 
     note('+ pre-commit autoupdate')
     subprocess.check_call(['pre-commit', 'autoupdate'])

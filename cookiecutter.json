@@ -37,6 +37,7 @@
   "pip_tools_version": "7.3.0",
   "setuptools_version": "69.0.3",
   "docker_compose_version": "3.8",
+  "docker_lock": false,
   "postgresql_version": "15",
   "redis_version": "7",
   "memcached_version": "1",
