@@ -47,8 +47,8 @@ if [[ "$(uname)" == "Darwin" ]]; then
     USER_UID=1000
     USER_GID=1000
 else
-    USER_UID="$(id --user "$USER")"
-    USER_GID="$(id --group "$USER")"
+    USER_UID="$(id -u "$USER")"
+    USER_GID="$(id -g "$USER")"
 fi
 
 if [[ -z "$(find requirements -maxdepth 1 -name '*.txt' -print -quit)" ]] || [[ "$*" == "requirements" ]]; then
