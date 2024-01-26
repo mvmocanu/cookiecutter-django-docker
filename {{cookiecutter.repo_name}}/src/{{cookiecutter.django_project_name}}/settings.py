@@ -7,6 +7,7 @@ https://docs.djangoproject.com/en/stable/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/stable/ref/settings/
 """
+
 from pathlib import Path
 
 from django.utils.translation import gettext_lazy as _
@@ -265,12 +266,12 @@ LOGGING = {
     },
     "loggers": {
         "django.request": {
+            "level": LOGGING_LEVEL,
             "handlers": ["console"],
-            "level": "ERROR",
             "propagate": True,
         },
         "django.db.backends": {
-            "level": "INFO",
+            "level": LOGGING_LEVEL,
             "handlers": ["console"],
             "propagate": False,
         },
@@ -327,7 +328,7 @@ if DEBUG_SQL:
             self.limit = limit
 
         def filter(self, record):
-            if getattr(record, "__sql_format_patched__", False):
+            if not getattr(record, "__sql_format_patched__", False):
                 frame = sys._getframe(1)
                 if self.limit:
                     while any(skip for skip in self.skip if frame.f_globals.get("__name__", "").startswith(skip)):
@@ -351,7 +352,7 @@ if DEBUG_SQL:
             return True
 
     LOGGING["loggers"]["django.db.backends"]["level"] = "DEBUG"
-    LOGGING["loggers"]["django.db.backends"]["filters"] = ["add_stack"]
+    LOGGING["loggers"]["django.db.backends"]["filters"] = ["sql_format"]
     LOGGING["filters"]["sql_format"] = {
         "()": SQLFormatFilter,
         "skip": ("django.db", "__main__"),
