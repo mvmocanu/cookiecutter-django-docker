@@ -36,6 +36,9 @@ server {
     location /.well-known/acme-challenge {
         root /shared/$SERVER_NAME;
     }
+    location /favicon.ico {
+        root /shared/$SERVER_NAME/static;
+    }
     location /static {
         root /shared/$SERVER_NAME;
         expires 1d;
