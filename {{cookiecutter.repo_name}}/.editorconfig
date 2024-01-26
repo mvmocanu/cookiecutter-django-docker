@@ -14,7 +14,7 @@ charset = utf-8
 [*.{bat,cmd,ps1}]
 end_of_line = crlf
 
-[*.{yml,yaml,html,xml,css,sh}]
+[*.{yml,yaml,html,xml}]
 indent_size = 2
 tab_width = 2
 
