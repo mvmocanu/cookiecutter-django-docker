@@ -18,7 +18,6 @@ x-python:
 {%- if cookiecutter.worker != 'none' %}
     - redis
 {%- endif %}
-  entrypoint: [ '/entrypoint.sh' ]
 {% raw %}
 services:
   nginx:
@@ -34,7 +33,6 @@ services:
       - /services/{{ service_name }}/run:/shared/{{ server_name }}/run
       - /services/{{ service_name }}/static:/shared/{{ server_name }}/static
       - /services/{{ service_name }}/.well-known:/shared/{{ server_name }}/.well-known
-    entrypoint: [ '/entrypoint.sh' ]
     ulimits:
       nproc: 16384
       nofile:

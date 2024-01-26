@@ -36,3 +36,5 @@ RUN groupadd --gid $GROUP_ID app \
  && useradd --uid $USER_ID --gid $GROUP_ID --shell /bin/bash --create-home /app
 
 COPY entrypoint.sh /
+
+ENTRYPOINT ["/entrypoint.sh"]

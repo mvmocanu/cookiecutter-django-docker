@@ -6,7 +6,6 @@ services:
       context: docker/requirements
     volumes:
       - ./requirements:/requirements
-    entrypoint: /entrypoint.sh
     env_file:
       - .env-test
   test:

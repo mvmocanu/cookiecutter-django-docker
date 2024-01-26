@@ -176,3 +176,5 @@ RUN <<EOF bash
         __strict_env__=false django-admin collectstatic --noinput --clear -v0
     fi
 EOF
+
+ENTRYPOINT ["/entrypoint.sh"]

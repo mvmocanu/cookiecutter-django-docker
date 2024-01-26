@@ -23,6 +23,7 @@ services:
     volumes:
       - ./.home/etc:/shared/${SERVER_NAME}/etc
       - ./.home/run:/shared/${SERVER_NAME}/run
+      - ./.home/static:/shared/${SERVER_NAME}/static
       - ./.home/etc:/etc/app
     depends_on:
       - web
@@ -34,7 +35,6 @@ services:
       nofile:
         soft: 65536
         hard: 262144
-    entrypoint: [ '/entrypoint.sh' ]
     command: [
       'holdup',
       '--verbose', 'unix:///shared/${SERVER_NAME}/run/uwsgi.sock',
@@ -47,6 +47,7 @@ services:
       DJANGO_COLLECTSTATIC: x
     volumes:
       - ./.home/run:/var/app/run
+      - ./.home/static:/var/app/static
     depends_on:
       - pg
     stop_signal: SIGTERM
@@ -65,6 +66,7 @@ services:
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./.home/run:/var/app/run
     ulimits:
       nproc: 16384
       nofile:
