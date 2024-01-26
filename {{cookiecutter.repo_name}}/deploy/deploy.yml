@@ -69,6 +69,7 @@
           exec > >(tee -a /services/deploy.log) 2>&1
           set -euxo pipefail
           docker compose exec -T -e POSTGRES_EXTRAS={{ database_name }} pg /docker-entrypoint-initdb.d/extra-users.sh
+      ignore_errors: yes
     - name: run migrations
       shell:
         executable: /bin/bash
