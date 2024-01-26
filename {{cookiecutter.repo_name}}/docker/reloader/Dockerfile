@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:{{ cookiecutter.dockerfile_version }}
 FROM ubuntu:{{ cookiecutter.ubuntu_version }}
 
 # Note: this uses ubuntu as the base instead of a more lightweight image
@@ -5,11 +6,16 @@ FROM ubuntu:{{ cookiecutter.ubuntu_version }}
 # of inotifywait which only supports Linux
 # (iow: to support Docker for Windows and other setups with strange storage)
 
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-                    fswatch docker.io dumb-init \
- && rm -rf /var/lib/apt/lists/*
+RUN test -e /etc/apt/apt.conf.d/docker-clean # sanity check
 
+RUN <<EOF bash
+    set -euxo pipefail
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update
+    apt-get install -y --no-install-recommends \
+                    fswatch docker.io docker-compose-v2 dumb-init
+EOF
 WORKDIR /app
 
 COPY start.sh /
