@@ -46,10 +46,12 @@ Or just run everything:
                         # and it actually has something connected to it
                         /bin/echo r 1<>/var/app/run/uwsgi.fifo >/var/app/run/uwsgi.fifo || docker compose restart web
                         # how does it work?
-                        #   since `echo` is a shell builtin we have to use the /bin/echo to have a subprocess
-                        #   1<>pipe connects stdout to `path`, as read-write
-                        #   >pipe reconnects stdout to `path`, as write-only, and, assuming the pipe is dead, only works because the
-                        #   previous temporary reader on the pipe (1<>pipe)
+                        # - since `echo` is a shell builtin we have to use the /bin/echo to have a subprocess
+                        # - 1<>pipe opens the pipe as read-write, and dups it to stdout
+                        # - >pipe opens the pipe again, but as write-only, and, assuming the pipe is dead, only works because the
+                        #   previous temporary reader on the pipe (1<>pipe), otherwise the open call would just get stuck
+                        # - finally, now that stdout is successfully connected to pipe, failed writes to stdout would trigger a SIGPIPE
+                        #   and error out the subprocess
                     else
                         set -x
                         docker compose restart "$name"
