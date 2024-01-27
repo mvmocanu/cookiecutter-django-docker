@@ -48,8 +48,9 @@ Or just run everything:
                         # how does it work?
                         # - since `echo` is a shell builtin we have to use the /bin/echo to have a subprocess
                         # - 1<>pipe opens the pipe as read-write, and dups it to stdout
-                        # - >pipe opens the pipe again, but as write-only, and, assuming the pipe is dead, only works because the
-                        #   previous temporary reader on the pipe (1<>pipe), otherwise the open call would just get stuck
+                        #   no, 1<pipe (open for read-only) would just get stuck without a writer
+                        # - >pipe opens the pipe again, but as write-only, dups it to stdout and, assuming the pipe is dead, only works
+                        #   because the previous temporary reader on the pipe (1<>pipe), otherwise the open call would just get stuck
                         # - finally, now that stdout is successfully connected to pipe, failed writes to stdout would trigger a SIGPIPE
                         #   and error out the subprocess
                     else
