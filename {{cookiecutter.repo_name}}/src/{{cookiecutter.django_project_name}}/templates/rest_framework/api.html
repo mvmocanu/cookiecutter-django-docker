@@ -1,0 +1,9 @@
+{% extends "rest_framework/base.html" %}
+
+{% block branding %}
+  <a class='navbar-brand'>Evignette-Checker {{ settings.PROJECT_VERSION }}</a>
+{% endblock %}
+{% block userlinks %}
+  <li class="navbar-link"><a href="{% url 'admin:index' %}">Admin</a></li>
+  {{ block.super }}
+{% endblock %}
