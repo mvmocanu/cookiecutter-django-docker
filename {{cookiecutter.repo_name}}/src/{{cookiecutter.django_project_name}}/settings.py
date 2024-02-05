@@ -261,29 +261,24 @@ LOGGING = {
         },
     },
     "root": {
-        "level": "DEBUG",
+        "level": LOGGING_LEVEL,
         "handlers": ["console", "mail_admins"],
     },
     "loggers": {
         "django.request": {
             "level": LOGGING_LEVEL,
-            "handlers": ["console"],
-            "propagate": True,
         },
         "django.db.backends": {
             "level": LOGGING_LEVEL,
-            "handlers": ["console"],
-            "propagate": False,
+        },
+        "uvicorn": {
+            "propagate": True,
         },
         "asyncio": {
-            "level": "WARNING",
-            "handlers": ["console"],
-            "propagate": False,
+            "level": "INFO",
         },
         "parso": {
             "level": "WARNING",
-            "handlers": ["console"],
-            "propagate": False,
         },
     },
     "filters": {},
