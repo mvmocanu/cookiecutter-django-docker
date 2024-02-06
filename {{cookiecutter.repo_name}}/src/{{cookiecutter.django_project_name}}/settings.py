@@ -245,7 +245,7 @@ LOGGING = {
     "formatters": {
         "verbose": {
             "format": "[%(asctime)s.%(msecs)d] %(name)s (%(levelname)s) %(message)s",
-            "datefmt": "%d/%b/%Y %H:%M:%S",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
     },
     "handlers": {
