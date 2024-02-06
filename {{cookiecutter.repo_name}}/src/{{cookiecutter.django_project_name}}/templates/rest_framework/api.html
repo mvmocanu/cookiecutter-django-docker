@@ -1,3 +1,4 @@
+{% raw -%}
 {% extends "rest_framework/base.html" %}
 
 {% block branding %}
@@ -7,3 +8,4 @@
   <li class="navbar-link"><a href="{% url 'admin:index' %}">Admin</a></li>
   {{ block.super }}
 {% endblock %}
+{%- endraw %}
