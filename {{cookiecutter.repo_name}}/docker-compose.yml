@@ -36,6 +36,7 @@ x-python:
     - ./.home:/root
     - ./.home:/home/app
     - ./.home/etc:/etc/app
+    - ./.home/logs:/var/app/logs
 services:
   pg:
     build:

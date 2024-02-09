@@ -9,6 +9,7 @@ x-python:
   volumes:
     - /services/{{ service_name }}/etc:/etc/app
     - /services/{{ service_name }}/logs:/var/app/logs
+    - /services/{{ service_name }}/media:/var/app/media
     - /services/{{ service_name }}/run:/var/app/run
     - /services/{{ service_name }}/static:/var/app/static
   ulimits:
@@ -35,6 +36,7 @@ services:
       - /services/nginx/logs:/var/app/logs
       - /services/{{ service_name }}/etc:/shared/{{ server_name }}/etc
       - /services/{{ service_name }}/logs:/shared/{{ server_name }}/logs
+      - /services/{{ service_name }}/media:/shared/{{ server_name }}/media
       - /services/{{ service_name }}/run:/shared/{{ server_name }}/run
       - /services/{{ service_name }}/static:/shared/{{ server_name }}/static
       - /services/{{ service_name }}/.well-known:/shared/{{ server_name }}/.well-known
@@ -95,5 +97,7 @@ services:
       POSTGRES_EXTRAS:
   mc:
     image: memcached:{{ cookiecutter.memcached_version }}
+    restart: always
   redis:
     image: redis:{{ cookiecutter.redis_version }}
+    restart: always
