@@ -157,7 +157,7 @@ COPY docker/python/nginx.conf /etc/app-latest
 COPY docker/python/nginx.site /etc/app-latest
 COPY docker/python/yacron.yml /etc/app-latest
 
-COPY --from=certs /certs/* /etc/app-defaults
+COPY --from=certs --chmod=0644 /certs/* /etc/app-defaults
 
 ARG SERVER_NAME="localhost"
 RUN <<EOF bash
