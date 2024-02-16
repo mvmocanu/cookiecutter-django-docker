@@ -1,4 +1,4 @@
-version: '{{ cookiecutter.docker_compose_version }}'
+version: '{{ cookiecutter.__docker_compose_version }}'
 {% raw %}
 x-python:
   &python
@@ -96,8 +96,8 @@ services:
       POSTGRES_PASSWORD: app
       POSTGRES_EXTRAS:
   mc:
-    image: memcached:{{ cookiecutter.memcached_version }}
+    image: memcached:{{ cookiecutter.__memcached_version }}
     restart: always
   redis:
-    image: redis:{{ cookiecutter.redis_version }}
+    image: redis:{{ cookiecutter.__redis_version }}
     restart: always

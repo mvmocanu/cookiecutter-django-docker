@@ -1,5 +1,5 @@
-# syntax=docker/dockerfile:{{ cookiecutter.dockerfile_version }}
-FROM buildpack-deps:{{ cookiecutter.ubuntu_version }}-scm as deps
+# syntax=docker/dockerfile:{{ cookiecutter.__dockerfile_version }}
+FROM buildpack-deps:{{ cookiecutter.__ubuntu_version }}-scm as deps
 
 ARG TZ=UTC
 
@@ -9,7 +9,7 @@ RUN <<EOF bash
     set -euxo pipefail
     export DEBIAN_FRONTEND=noninteractive
 
-    echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list
+    echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.__ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list
     curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
     apt-get update
     apt-get install -y --no-install-recommends \
@@ -26,7 +26,7 @@ EOF
 RUN <<EOF bash
     set -euxo pipefail
     curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - --no-cache --disable-pip-version-check --upgrade \
-    pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }} pip-tools=={{ cookiecutter.pip_tools_version }}
+    pip=={{ cookiecutter.__pip_version }} setuptools=={{ cookiecutter.__setuptools_version }} pip-tools=={{ cookiecutter.__pip_tools_version }}
 EOF
 
 ENV CPUCOUNT=1

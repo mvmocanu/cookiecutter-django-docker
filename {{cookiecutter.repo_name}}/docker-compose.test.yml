@@ -1,4 +1,4 @@
-version: '{{ cookiecutter.docker_compose_version }}'
+version: '{{ cookiecutter.__docker_compose_version }}'
 
 services:
   requirements:

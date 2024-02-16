@@ -1,5 +1,5 @@
-# syntax=docker/dockerfile:{{ cookiecutter.dockerfile_version }}
-FROM buildpack-deps:{{ cookiecutter.ubuntu_version }}-scm as deps
+# syntax=docker/dockerfile:{{ cookiecutter.__dockerfile_version }}
+FROM buildpack-deps:{{ cookiecutter.__ubuntu_version }}-scm as deps
 
 # DEBIAN_FRONTEND=noninteractive exists to prevent tzdata going nuts.
 # Maybe dpkg incorrectly detects interactive on buildkit containers?
@@ -7,7 +7,7 @@ RUN <<EOF bash
     set -euxo pipefail
     export DEBIAN_FRONTEND=noninteractive
 
-    echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list
+    echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.__ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list
     curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
     apt-get update
     apt-get install -y --no-install-recommends \
@@ -23,7 +23,7 @@ EOF
 RUN <<EOF bash
     set -euxo pipefail
     curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - --no-cache --disable-pip-version-check --upgrade \
-    pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}
+    pip=={{ cookiecutter.__pip_version }} setuptools=={{ cookiecutter.__setuptools_version }}
 EOF
 
 # This intents to be the sole Dockerfile for the project so allow building variants with different or no dependencies.
@@ -44,7 +44,7 @@ EOF
 
 ##################################
 ##################################
-FROM buildpack-deps:{{ cookiecutter.ubuntu_version }} as certs
+FROM buildpack-deps:{{ cookiecutter.__ubuntu_version }} as certs
 ##################################
 ARG SERVER_NAME="localhost"
 RUN mkdir /certs \
@@ -54,7 +54,7 @@ RUN mkdir /certs \
 
 #################
 #################
-FROM ubuntu:{{ cookiecutter.ubuntu_version }}
+FROM ubuntu:{{ cookiecutter.__ubuntu_version }}
 #################
 RUN test -e /etc/apt/apt.conf.d/docker-clean # sanity check
 
@@ -65,8 +65,8 @@ RUN <<EOF bash
     apt-get update
     apt-get install -y --no-install-recommends \
         curl software-properties-common gpg-agent
-    echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list
-    echo "deb http://nginx.org/packages/mainline/ubuntu/ {{ cookiecutter.ubuntu_release }} nginx" > /etc/apt/sources.list.d/nginx.list
+    echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.__ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list
+    echo "deb http://nginx.org/packages/mainline/ubuntu/ {{ cookiecutter.__ubuntu_release }} nginx" > /etc/apt/sources.list.d/nginx.list
     curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
     curl http://nginx.org/keys/nginx_signing.key | gpg --dearmor > /etc/apt/trusted.gpg.d/nginx.org.gpg
     apt-get update
@@ -99,7 +99,7 @@ RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
 RUN <<EOF bash
     set -euxo pipefail
     curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - --no-cache --disable-pip-version-check --upgrade \
-    pip=={{ cookiecutter.pip_version }} setuptools=={{ cookiecutter.setuptools_version }}
+    pip=={{ cookiecutter.__pip_version }} setuptools=={{ cookiecutter.__setuptools_version }}
 EOF
 
 RUN --mount=type=bind,from=deps,src=/deps,target=/deps <<EOF bash

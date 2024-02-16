@@ -1,4 +1,4 @@
-version: '{{ cookiecutter.docker_compose_version }}'
+version: '{{ cookiecutter.__docker_compose_version }}'
 
 x-python:
   &python
@@ -56,10 +56,10 @@ services:
       - ./.home:/root
 
   mc:
-    image: memcached:{{ cookiecutter.memcached_version }}
+    image: memcached:{{ cookiecutter.__memcached_version }}
 
   redis:
-    image: redis:{{ cookiecutter.redis_version }}
+    image: redis:{{ cookiecutter.__redis_version }}
 
   cron:
     <<: *python

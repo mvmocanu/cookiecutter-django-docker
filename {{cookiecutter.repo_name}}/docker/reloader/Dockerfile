@@ -1,5 +1,5 @@
-# syntax=docker/dockerfile:{{ cookiecutter.dockerfile_version }}
-FROM ubuntu:{{ cookiecutter.ubuntu_version }}
+# syntax=docker/dockerfile:{{ cookiecutter.__dockerfile_version }}
+FROM ubuntu:{{ cookiecutter.__ubuntu_version }}
 
 # Note: this uses ubuntu as the base instead of a more lightweight image
 # like alpine because fswatch ain't in alpine and we want to use it instead
