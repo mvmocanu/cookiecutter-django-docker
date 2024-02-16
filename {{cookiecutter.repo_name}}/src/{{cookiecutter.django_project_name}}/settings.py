@@ -59,7 +59,7 @@ EMAIL_BACKEND = env.str("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.smtp.
 EMAIL_FILE_PATH = env.get("DJANGO_EMAIL_FILE_PATH")
 
 DEFAULT_FROM_EMAIL = env.get("DEFAULT_FROM_EMAIL")
-
+SERVER_EMAIL = env.str("SERVER_EMAIL", "root@localhost")
 
 # Application definition
 
