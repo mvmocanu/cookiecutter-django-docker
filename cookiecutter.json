@@ -33,6 +33,7 @@
   "timezone": "Europe/Bucharest",
   "project_version": "0.1.0",
   "docker_lock": false,
+  "ruff_unsafe_fixes": false,
   "_dockerfile_version": "1.4",
   "_pip_version": "24.0",
   "_django_version": "5.0",
