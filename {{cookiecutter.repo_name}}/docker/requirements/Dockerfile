@@ -26,11 +26,11 @@ EOF
 RUN <<EOF bash
     set -euxo pipefail
     curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - --no-cache --disable-pip-version-check --upgrade \
-{% if cookicutter.uv_enabled %}
+{%- if cookiecutter.uv_enabled %}
     uv=={{ cookiecutter.__uv_version }}
-{% else %}
+{%- else %}
     pip=={{ cookiecutter.__pip_version }} setuptools=={{ cookiecutter.__setuptools_version }} pip-tools=={{ cookiecutter.__pip_tools_version }}
-{% endif %}
+{%- endif %}
 EOF
 
 ENV CPUCOUNT=1

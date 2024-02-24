@@ -1,9 +1,9 @@
 #!/bin/bash -eux
 ls -al requirements
 for req in requirements/*.in; do
-{% if cookicutter.uv_enabled %}
+{%- if cookiecutter.uv_enabled %}
   uv pip compile --generate-hashes --allow-unsafe --quiet --upgrade --strip-extras --resolver=backtracking $req --output-file=${req%.*}.txt
-{% else %}
+{%- else %}
   pip-compile --generate-hashes --allow-unsafe --quiet --upgrade --strip-extras --resolver=backtracking $req
-{% endif %}
+{%- endif %}
 done
