@@ -7,13 +7,13 @@ RUN <<EOF bash
     set -euxo pipefail
     export DEBIAN_FRONTEND=noninteractive
 
-    echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.__ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list
+    echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.__ubuntu_release }}-pgdg main {{ cookiecutter.__postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list
     curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
     apt-get update
     apt-get install -y --no-install-recommends \
         python3-dev python3-distutils-extra \
         python-is-python3 \
-        libpq-dev={{ cookiecutter.postgresql_version.split('.')|first }}.* libpq5={{ cookiecutter.postgresql_version.split('.')|first }}.* \
+        libpq-dev={{ cookiecutter.__postgresql_version.split('.')|first }}.* libpq5={{ cookiecutter.__postgresql_version.split('.')|first }}.* \
         libgdal-dev \
         libtiff-dev libjpeg-dev libzip-dev libfreetype-dev \
         libwebp-dev tcl-dev tk-dev libffi-dev \
@@ -65,7 +65,7 @@ RUN <<EOF bash
     apt-get update
     apt-get install -y --no-install-recommends \
         curl software-properties-common gpg-agent
-    echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.__ubuntu_release }}-pgdg main {{ cookiecutter.postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list
+    echo "deb http://apt.postgresql.org/pub/repos/apt {{ cookiecutter.__ubuntu_release }}-pgdg main {{ cookiecutter.__postgresql_version.split('.')|first }}" > /etc/apt/sources.list.d/pgdg.list
     echo "deb http://nginx.org/packages/mainline/ubuntu/ {{ cookiecutter.__ubuntu_release }} nginx" > /etc/apt/sources.list.d/nginx.list
     curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
     curl http://nginx.org/keys/nginx_signing.key | gpg --dearmor > /etc/apt/trusted.gpg.d/nginx.org.gpg
@@ -76,7 +76,7 @@ RUN <<EOF bash
         rsync moreutils \
         graphviz \
         dumb-init \
-        libpq5={{ cookiecutter.postgresql_version.split('.')|first }}.* postgresql-client-{{ cookiecutter.postgresql_version.split('.')|first }} \
+        libpq5={{ cookiecutter.__postgresql_version.split('.')|first }}.* postgresql-client-{{ cookiecutter.__postgresql_version.split('.')|first }} \
         python3-dbg python3-distutils python3-distutils-extra \
         python3-gdal gdal-bin \
         python-is-python3 \

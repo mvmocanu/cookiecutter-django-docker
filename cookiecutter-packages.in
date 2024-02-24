@@ -2,3 +2,4 @@ pip
 pip-tools
 setuptools
 django
+uv
