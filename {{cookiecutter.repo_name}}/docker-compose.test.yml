@@ -33,7 +33,7 @@ services:
       - pg
     volumes:
       - ./:/app
-      - ./.home:/home/app
+      - ./.home:/var/app
   pg:
     build:
       context: docker/postgres

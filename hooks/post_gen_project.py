@@ -72,6 +72,11 @@ if __name__ == "__main__":
     if os.path.exists('setup.cfg'):
         os.unlink('setup.cfg')
 
+    if os.path.exists(join('deploy', '{{cookiecutter.deploy_name}}', '.env')):
+        os.unlink(join('deploy', '{{cookiecutter.deploy_name}}', '.env-sample'))
+    else:
+        os.rename(join('deploy', '{{cookiecutter.deploy_name}}', '.env-sample'), join('deploy', '{{cookiecutter.deploy_name}}', '.env'))
+
     if not os.path.exists('.env'):
         warn("You don't have an .env file yet. The default linux one is being copied for you...")
         note('+ cp .env-linux-osx .env')

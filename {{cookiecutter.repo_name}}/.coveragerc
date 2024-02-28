@@ -1,5 +1,5 @@
 [run]
-data_file = /home/app/.coverage
+data_file = /var/app/.coverage
 branch = true
 source = src
 

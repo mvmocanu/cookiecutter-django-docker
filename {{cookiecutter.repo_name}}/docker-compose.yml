@@ -34,9 +34,8 @@ x-python:
   volumes:
     - .:/app
     - ./.home:/root
-    - ./.home:/home/app
+    - ./.home:/var/app
     - ./.home/etc:/etc/app
-    - ./.home/logs:/var/app/logs
 services:
   pg:
     build:
