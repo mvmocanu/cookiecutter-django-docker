@@ -114,13 +114,13 @@ TEMPLATES = [
 ]
 
 SETTINGS_EXPORT = [
-    "DEBUG",
-    "SERVER_NAME",
-    "SERVER_PROTOCOL",
-    "SERVER_PREFIX",
-    "SITE_NAME",
-    "PROJECT_VERSION",
     "ANALYTICS_GTAG",
+    "DEBUG",
+    "PROJECT_VERSION",
+    "SERVER_NAME",
+    "SERVER_PREFIX",
+    "SERVER_PROTOCOL",
+    "SITE_NAME",
 ]
 
 WSGI_APPLICATION = "{{ cookiecutter.django_project_name }}.wsgi.application"
@@ -130,12 +130,12 @@ WSGI_APPLICATION = "{{ cookiecutter.django_project_name }}.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env.get("DJANGO_DB_NAME"),
-        "USER": env.get("DJANGO_DB_USER"),
-        "PASSWORD": env.get("DJANGO_DB_PASSWORD"),
-        "HOST": env.get("DJANGO_DB_HOST"),
         "ATOMIC_REQUESTS": True,
+        "ENGINE": "django.db.backends.postgresql",
+        "HOST": env.get("DJANGO_DB_HOST"),
+        "NAME": env.get("DJANGO_DB_NAME"),
+        "PASSWORD": env.get("DJANGO_DB_PASSWORD"),
+        "USER": env.get("DJANGO_DB_USER"),
     }
 }
 
@@ -145,8 +145,9 @@ CACHES = {
             "DJANGO_CACHE_BACKEND",
             "django.core.cache.backends.dummy.DummyCache" if DEBUG else "django.core.cache.backends.locmem.LocMemCache",
         ),
-        "LOCATION": env.get("DJANGO_CACHE_LOCATION"),
         "KEY_PREFIX": env.get("DJANGO_CACHE_KEY_PREFIX"),
+        "LOCATION": env.get("DJANGO_CACHE_LOCATION"),
+        "TIMEOUT": env.int("DJANGO_CACHE_TIMEOUT", 0) or None,
     }
 }
 
@@ -265,21 +266,13 @@ LOGGING = {
         "handlers": ["console", "mail_admins"],
     },
     "loggers": {
-        "django.request": {
-            "level": LOGGING_LEVEL,
-        },
-        "django.db.backends": {
-            "level": LOGGING_LEVEL,
-        },
-        "uvicorn": {
-            "propagate": True,
-        },
-        "asyncio": {
-            "level": "INFO",
-        },
-        "parso": {
-            "level": "WARNING",
-        },
+        "django.request": {"level": LOGGING_LEVEL},
+        "django.db.backends": {"level": LOGGING_LEVEL},
+        "uvicorn": {"propagate": True},
+        "asyncio": {"level": "INFO"},
+        "parso": {"level": "WARNING"},
+        "httpcore": {"level": "WARNING"},
+        "httpx": {"level": "WARNING"},
     },
     "filters": {},
 }
