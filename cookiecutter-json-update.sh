@@ -3,10 +3,12 @@ set -euxo pipefail
 shopt -s extglob
 
 update_field() {
+  set +x
   field="$1"
   value="$2"
   cookiecutter_json=$(cat cookiecutter.json | jq ._$field=\"$value\" | jq ".__prompts__.$field=\"$field (latest=$value)\"" )
   echo "$cookiecutter_json" > cookiecutter.json
+  set -x
 }
 
 uv pip compile --allow-unsafe --quiet cookiecutter-packages.in --output-file=cookiecutter-packages.txt
