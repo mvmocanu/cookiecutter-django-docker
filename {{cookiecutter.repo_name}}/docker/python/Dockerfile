@@ -145,6 +145,7 @@ RUN ln -sf /proc/self/fd/2 /var/app/logs/error.log \
  && ln -sf /proc/self/fd/1 /shared/$SERVER_NAME/logs/access.log
 
 COPY src /app/src
+RUN python -mcompileall /app/src
 
 WORKDIR /app
 
