@@ -40,11 +40,8 @@ services:
   pg:
     build:
       context: docker/postgres
-    environment:
-      POSTGRES_USER:
-      POSTGRES_PASSWORD:
-      POSTGRES_DB:
-      PGDATA:
+    env_file:
+      - .env
     command: [
       'postgres',
       '-c', 'log_lock_waits=true',
