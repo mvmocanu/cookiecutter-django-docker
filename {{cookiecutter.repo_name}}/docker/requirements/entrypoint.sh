@@ -1,4 +1,5 @@
 #!/bin/bash -eux
+python --version
 ls -al requirements
 for req in requirements/*.in; do
 {%- if cookiecutter.uv_enabled %}
