@@ -135,6 +135,7 @@ DATABASES = {
         "HOST": env.get("DJANGO_DB_HOST"),
         "NAME": env.get("DJANGO_DB_NAME"),
         "PASSWORD": env.get("DJANGO_DB_PASSWORD"),
+        "PORT": env.int("DJANGO_DB_PORT", 5432),
         "USER": env.get("DJANGO_DB_USER"),
     }
 }
