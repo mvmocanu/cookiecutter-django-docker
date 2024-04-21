@@ -4,7 +4,7 @@
   tags: [build]
   tasks:
     - name: start registry
-      docker_compose:
+      docker_compose_v2:
         project_name: registry
         remove_orphans: yes
         definition:
@@ -123,7 +123,7 @@
   tasks:
     - name: shutdown registry
       tags: [cleanup]
-      docker_compose:
+      docker_compose_v2:
         project_name: registry
         state: absent
         remove_orphans: yes
