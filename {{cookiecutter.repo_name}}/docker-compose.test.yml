@@ -1,5 +1,3 @@
-version: '{{ cookiecutter.__docker_compose_version }}'
-
 services:
   requirements:
     build:

@@ -1,5 +1,3 @@
-version: '{{ cookiecutter.__docker_compose_version }}'
-
 services:
   nginx:
     image: ${registry_host}/${service_name}-nginx:${app_version}

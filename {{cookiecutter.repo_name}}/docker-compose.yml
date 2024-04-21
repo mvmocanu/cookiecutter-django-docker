@@ -1,5 +1,3 @@
-version: '{{ cookiecutter.__docker_compose_version }}'
-
 x-python:
   &python
   build:

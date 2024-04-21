@@ -1,6 +1,4 @@
 # An alternative dev configuration with the more simple devserver (easier to debug but you lose dev-prod parity)
-version: '{{ cookiecutter.__docker_compose_version }}'
-
 services:
   pg:
     ports:

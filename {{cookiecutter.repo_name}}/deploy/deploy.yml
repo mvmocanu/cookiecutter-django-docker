@@ -8,7 +8,6 @@
         project_name: registry
         remove_orphans: yes
         definition:
-          version: '3.7'
           services: >
             {
               "{{ service_name }}": {
@@ -129,6 +128,5 @@
         state: absent
         remove_orphans: yes
         definition:
-          version: '3.7'
           services: '{"{{ service_name }}": {"image": "registry:2"}}'
 {%- endraw %}
