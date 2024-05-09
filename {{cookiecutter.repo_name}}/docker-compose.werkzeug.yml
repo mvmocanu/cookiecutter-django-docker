@@ -1,12 +1,12 @@
 services:
   web:
-    environment:
-      DJANGO_DB_MIGRATE: x
-    privileged: true
-    ports:
-      - '80:8000'
     command: [
       'pysu', 'app', '--',
-      'django-admin', 'runserver_plus', '--insecure', '--nopin', '0.0.0.0:8000'
+      'django-admin', 'runserver_plus',
+      '--insecure',
+      '--nopin',
+      '0.0.0.0:8000'
     ]
     stop_signal: SIGINT
+    environment:
+      DJANGO_DEBUG: true

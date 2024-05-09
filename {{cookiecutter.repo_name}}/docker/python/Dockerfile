@@ -27,7 +27,7 @@ RUN <<EOF bash
 EOF
 
 # This intents to be the sole Dockerfile for the project so allow building variants with different or no dependencies.
-COPY requirements/*.txt /requirements/
+COPY --link --from=requirements-context *.txt /requirements/
 ARG REQUIREMENTS
 ARG CPUCOUNT=1
 RUN --mount=type=cache,target=/root/.cache <<EOF bash
@@ -115,7 +115,7 @@ EOF
 # This is more geared to development (eg: match user's UID) than production (where you shouln't need any sudo/home).
 ARG USER_ID=1000
 ARG GROUP_ID=1000
-RUN groupadd --gid $GROUP_ID app \
+RUN groupadd --gid $GROUP_ID app || true \
  && useradd --uid $USER_ID --gid $GROUP_ID --shell /bin/bash --create-home app \
  && echo "app ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
@@ -127,6 +127,7 @@ ENV DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
 
 ARG DJANGO_SECRET_KEY="n/a"
 ARG SERVER_NAME="localhost"
+ENV SERVER_NAME=$SERVER_NAME
 
 RUN mkdir -p /app /var/app/logs /var/app/static /var/app/run /etc/app /etc/app-defaults /etc/app-latest \
              /shared/$SERVER_NAME/etc /shared/$SERVER_NAME/logs \
@@ -144,21 +145,18 @@ RUN ln -sf /proc/self/fd/2 /var/app/logs/error.log \
  && ln -sf /proc/self/fd/2 /shared/$SERVER_NAME/logs/error.log \
  && ln -sf /proc/self/fd/1 /shared/$SERVER_NAME/logs/access.log
 
-COPY src /app/src
-RUN python -mcompileall /app/src
-
 WORKDIR /app
 
-COPY docker/python/entrypoint.sh /
-COPY docker/python/uwsgi.ini /etc/app-latest
+# Note that the trailing slash is significant.
+COPY --link entrypoint.sh /
+COPY --link uwsgi.ini /etc/app-latest/
 {%- if cookiecutter.worker == "rq" %}
-COPY docker/python/worker.ini /etc/app-latest
+COPY --link worker.ini /etc/app-latest/
 {%- endif %}
-COPY docker/python/nginx.conf /etc/app-latest
-COPY docker/python/nginx.site /etc/app-latest
-COPY docker/python/yacron.yml /etc/app-latest
-
-COPY --from=certs --chmod=0644 /certs/* /etc/app-defaults
+COPY --link nginx.conf /etc/app-latest/
+COPY --link nginx.site /etc/app-latest/
+COPY --link yacron.yml /etc/app-latest/
+COPY --link --from=certs --chmod=0644 /certs/* /etc/app-defaults/
 
 ARG SERVER_NAME="localhost"
 RUN <<EOF bash
@@ -169,6 +167,10 @@ RUN cp /etc/app-defaults/fullchain.pem /etc/app-defaults/chain.pem \
  && ln -sf /etc/app/nginx.conf /etc/nginx/nginx.conf \
  && cp /etc/nginx/mime.types /etc/app-latest \
  && chmod -R go+r /etc/app
+
+COPY --link --from=src-context . /app/src
+
+RUN python -mcompileall /app/src
 
 ARG DJANGO_COLLECTSTATIC
 RUN <<EOF bash

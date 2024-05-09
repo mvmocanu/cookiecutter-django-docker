@@ -1,20 +1,30 @@
 services:
+  reloader:
+    extends:
+      service: reloader
+      file: docker-compose.common.yml
+
+  web:
+    # Because this file is an overlay this service is not completely defined.
+    environment:
+      DJANGO_COLLECTSTATIC: x
+    volumes:
+      - ./.home/run:/var/app/run
+      - ./.home/static:/var/app/static
+    stop_signal: SIGTERM
+    command: [
+      'uwsgi',
+      '--ini', '/etc/app/uwsgi.ini',
+      '--processes', '4',
+    ]
+
   nginx:
+    extends:
+      service: python
+      file: docker-compose.common.yml
     build:
-      context: .
-      dockerfile: docker/python/Dockerfile
       args:
         REQUIREMENTS: nginx
-        SERVER_NAME:
-    environment:
-      SERVER_NAME:
-      PYTHONHUNTER:
-      PYTHONHUNTERCONFIG:
-      DJANGO_DEBUG:
-      DJANGO_DEBUG_SQL:
-      DJANGO_DEBUG_SQL_LIMIT:
-      DJANGO_DEBUG_TOOLBAR:
-    tty: false
     volumes:
       - ./.home/etc:/shared/${SERVER_NAME}/etc
       - ./.home/run:/shared/${SERVER_NAME}/run
@@ -25,45 +35,9 @@ services:
     ports:
       - '80:80'
       - '443:443'
-    ulimits:
-      nproc: 16384
-      nofile:
-        soft: 65536
-        hard: 262144
     command: [
       'holdup',
       '--verbose', 'unix:///shared/${SERVER_NAME}/run/uwsgi.sock',
       '--',
       'nginx',
     ]
-  web:
-    environment:
-      DJANGO_DB_MIGRATE: x
-      DJANGO_COLLECTSTATIC: x
-    volumes:
-      - ./.home/run:/var/app/run
-      - ./.home/static:/var/app/static
-    depends_on:
-      - pg
-    stop_signal: SIGTERM
-    command: [
-      'uwsgi',
-      '--ini', '/etc/app/uwsgi.ini',
-      '--processes', '4',
-    ]
-  reloader:
-    build:
-      context: docker/reloader
-    environment:
-      RELOADER_MONITOR:
-      RELOADER_CONTAINERS:
-      COMPOSE_PROJECT_NAME:
-    volumes:
-      - .:/app
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./.home/run:/var/app/run
-    ulimits:
-      nproc: 16384
-      nofile:
-        soft: 65536
-        hard: 262144

@@ -1,94 +1,57 @@
-x-python:
-  &python
-  build:
-    context: .
-    dockerfile: docker/python/Dockerfile
-    args:
-      REQUIREMENTS: base
-      DJANGO_SETTINGS_MODULE:
-      DJANGO_COLLECTSTATIC: x
-      SERVER_NAME:
-  environment:
-    PYTHONHUNTER:
-    PYTHONHUNTERCONFIG:
-    DJANGO_DEBUG:
-    DJANGO_DEBUG_SQL:
-    DJANGO_DEBUG_SQL_LIMIT:
-    DJANGO_DEBUG_TOOLBAR:
-    LOGGING_LEVEL:
-    LOGGING_PATH:
-  env_file:
-    - .env
-  tty: false
-  deploy:
-    resources:
-      limits:
-        memory: ${MEMORY_LIMIT:-4G}
-  ulimits:
-    nproc: 16384
-    nofile:
-      soft: 65536
-      hard: 262144
-  volumes:
-    - .:/app
-    - ./.home:/root
-    - ./.home:/var/app
-    - ./.home/etc:/etc/app
+# This is the default configuration file. This could be named docker-compose.dev.yml or similar, however the lack of a docker-compose.yml
+# would confuse Compose if there's a docker-compose.yml anywhere in any parent directory of the project checkout path (it would run that,
+# and switch the compose project directory completely to that).
+#
+# Thus, this is designed to be the main config file, and everything else to be added to this as overlays in your .env file.
 services:
   pg:
-    build:
-      context: docker/postgres
+    extends:
+      service: pg
+      file: docker-compose.common.yml
     env_file:
       - .env
-    command: [
-      'postgres',
-      '-c', 'log_lock_waits=true',
-      '-c', 'log_min_error_statement=WARNING',
-      '-c', 'log_min_duration_statement=1s',
-    ]
-    volumes:
-      - ./.home:/root
+    environment:
+      PGDATA: /root/pg
+    ports:
+      - 5432:5432
 
   mc:
-    image: memcached:{{ cookiecutter.__memcached_version }}
+    extends:
+      service: mc
+      file: docker-compose.common.yml
 
   redis:
-    image: redis:{{ cookiecutter.__redis_version }}
+    extends:
+      service: redis
+      file: docker-compose.common.yml
 
-  cron:
-    <<: *python
+  worker:
+    extends:
+      service: worker
+      file: docker-compose.common.yml
     depends_on:
       - pg
-    command: [ 'pysu', 'app', '--', 'yacron', '--config=/etc/app/yacron.yml' ]
+      - redis
 
   web:
-    <<: *python
+    extends:
+      service: python
+      file: docker-compose.common.yml
+    env_file:
+      - .env
+    environment:
+      DJANGO_DB_MIGRATE: x
+    ports:
+      - "8000:8000"
     depends_on:
       - pg
       - mc
       - redis
-{%- if cookiecutter.worker == "celery" %}
-
-  worker:
-    <<: *python
     command: [
-      'pysu', 'app', '--',
-      'celery', '-A', '{{ cookiecutter.django_project_name }}', 'worker'
+      "pysu", "app",
+      "django-admin",
+      "runserver",
+      "--insecure",
+      "0.0.0.0:8000"
     ]
-    depends_on:
-      - pg
-      - redis
-{%- elif cookiecutter.worker == "rq" %}
-
-  worker:
-    <<: *python
-    command: [
-      'pysu', 'app', '--',
-      'django-admin', 'rqworker'
-    ]
-    depends_on:
-      - pg
-      - redis
-    deploy:
-      replicas: 2
-{%- endif %}
+    stop_signal: SIGINT

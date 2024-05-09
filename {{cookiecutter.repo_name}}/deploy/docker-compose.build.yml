@@ -2,15 +2,19 @@ services:
   nginx:
     image: ${registry_host}/${service_name}-nginx:${app_version}
     build:
-      context: ..
-      dockerfile: docker/python/Dockerfile
+      context: ../docker/python
+      additional_contexts:
+        requirements-context: ../requirements
+        src-context: ../src
       args:
         REQUIREMENTS: nginx
   python:
     image: ${registry_host}/${service_name}-python:${app_version}
     build:
-      context: ..
-      dockerfile: docker/python/Dockerfile
+      context: ../docker/python
+      additional_contexts:
+        requirements-context: ../requirements
+        src-context: ../src
       args:
         REQUIREMENTS: base
         DJANGO_SETTINGS_MODULE: ${django_settings_module}

@@ -1,0 +1,102 @@
+# This file contains mostly build definitions. Ports, env files and dependencies have no place because this file would be used for release
+# or test configurations.
+# Volumes shouldn't either, but we're making a compromise for DRY-ness.
+services:
+  mc:
+    image: memcached:{{ cookiecutter.__memcached_version }}
+
+  redis:
+    image: redis:{{ cookiecutter.__redis_version }}
+
+  pg:
+    build:
+      context: docker/postgres
+    command: [
+      "postgres",
+      "-c", "log_statement=all",
+      "-c", "log_duration=true",
+      "-c", "log_lock_waits=true",
+      "-c", "log_min_error_statement=WARNING",
+      "-c", "log_min_duration_statement=1s",
+      "-c", "log_connections=true",
+      "-c", "log_disconnections=true",
+      "-c", "max_connections=25",
+      "-c", "listen_addresses=*",
+    ]
+    volumes:
+      - ./.home:/root
+      - .:/app
+
+  python:
+    build:
+      context: docker/python
+      additional_contexts:
+        requirements-context: requirements
+        src-context: src
+      args:
+        DJANGO_COLLECTSTATIC:
+        DJANGO_SETTINGS_MODULE:
+        REQUIREMENTS: base
+        SERVER_NAME:
+    environment:
+      PYTHONHUNTER:
+      PYTHONHUNTERCONFIG:
+      DJANGO_DEBUG:
+      DJANGO_DEBUG_SQL:
+      DJANGO_DEBUG_SQL_LIMIT:
+      DJANGO_DEBUG_TOOLBAR:
+      LOGGING_LEVEL:
+      LOGGING_PATH:
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-4G}
+    ulimits:
+      nproc: 16384
+      nofile:
+        soft: 65536
+        hard: 262144
+    volumes:
+      - .:/app
+      - ./.home:/root
+      - ./.home:/home/app
+      - ./.home:/var/app
+    init: true
+{%- if cookiecutter.worker == "celery" %}
+
+  worker:
+    extends:
+      service: python
+    command: [
+      'pysu', 'app', '--',
+      'celery', '-A', '{{ cookiecutter.django_project_name }}', 'worker'
+    ]
+{%- elif cookiecutter.worker == "rq" %}
+
+  worker:
+    extends:
+      service: python
+    deploy:
+      replicas: 2
+    command: [
+      'pysu', 'app', '--',
+      'django-admin', 'rqworker'
+    ]
+{%- endif %}
+
+  reloader:
+    build:
+      context: docker/reloader
+    environment:
+      RELOADER_MONITOR:
+      RELOADER_CONTAINERS:
+      COMPOSE_PROJECT_NAME:
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./.home/run:/var/app/run
+    ulimits:
+      nproc: 16384
+      nofile:
+        soft: 65536
+        hard: 262144

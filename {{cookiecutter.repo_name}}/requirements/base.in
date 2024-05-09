@@ -12,7 +12,6 @@ python-dateutil
 sentry-sdk
 tzdata
 
-
 # connectors
 psycopg[c]
 pylibmc
@@ -25,6 +24,7 @@ pysu
 django-debug-toolbar
 django-extensions
 django-rosetta
+werkzeug
 
 # for sql logging
 sqlparse

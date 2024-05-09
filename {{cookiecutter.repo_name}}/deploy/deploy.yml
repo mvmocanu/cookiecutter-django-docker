@@ -4,7 +4,7 @@
   tags: [build]
   tasks:
     - name: start registry
-      docker_compose_v2:
+      community.docker.docker_compose_v2:
         project_name: registry
         remove_orphans: yes
         definition:
@@ -54,6 +54,13 @@
   environment:
     COMPOSE_FILE: '{{ compose_files }}'
   tasks:
+    - name: 'copy .env'
+      tags: [env]
+      copy:
+        src: '{{ inventory_dir }}/.env'
+        dest: '/services/{{ service_name }}/.env'
+        backup: yes
+      register: envfile
     - name: set default docker-compose.yml in environment
       tags: [env]
       lineinfile:
@@ -123,7 +130,7 @@
   tasks:
     - name: shutdown registry
       tags: [cleanup]
-      docker_compose_v2:
+      community.docker.docker_compose_v2:
         project_name: registry
         state: absent
         remove_orphans: yes

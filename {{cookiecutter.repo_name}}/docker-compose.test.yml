@@ -6,10 +6,12 @@ services:
       - ./requirements:/requirements
     env_file:
       - .env-test
+
   test:
+    extends:
+      service: python
+      file: docker-compose.common.yml
     build:
-      context: .
-      dockerfile: docker/python/Dockerfile
       args:
         REQUIREMENTS: test
         DJANGO_SETTINGS_MODULE: '{{ cookiecutter.django_project_name }}.settings_test'
@@ -32,18 +34,10 @@ services:
     volumes:
       - ./:/app
       - ./.home:/var/app
+
   pg:
-    build:
-      context: docker/postgres
+    extends:
+      service: pg
+      file: docker-compose.common.yml
     env_file:
       - .env-test
-    command: [
-      'postgres',
-      '-c', 'log_statement=all',
-      '-c', 'log_duration=true',
-      '-c', 'log_disconnections=true',
-      '-c', 'log_connections=true',
-      '-c', 'log_lock_waits=true',
-      '-c', 'log_min_error_statement=WARNING',
-      '-c', 'log_min_duration_statement=1s',
-    ]
