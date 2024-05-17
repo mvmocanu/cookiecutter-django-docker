@@ -1,15 +1,14 @@
 -r base.txt
 
-factory_boy
-django-webtest
-coverage
-WebTest
 
 pytest
 pytest-django
-pytest-clarity
 pytest-cov
-pytest-recording
+
+# optionals
+django-webtest
 pytest-deadfixtures
 pytest-leaks
+pytest-recording
+respx
 time-machine
