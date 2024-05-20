@@ -4,9 +4,11 @@
 services:
   mc:
     image: memcached:{{ cookiecutter.__memcached_version }}
+{%- if cookiecutter.worker != 'none' %}
 
   redis:
     image: redis:{{ cookiecutter.__redis_version }}
+{%- endif %}
 
   pg:
     build:

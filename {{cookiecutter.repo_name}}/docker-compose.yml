@@ -19,6 +19,7 @@ services:
     extends:
       service: mc
       file: docker-compose.common.yml
+{%- if cookiecutter.worker != 'none' %}
 
   redis:
     extends:
@@ -32,6 +33,7 @@ services:
     depends_on:
       - pg
       - redis
+{%- endif %}
 
   web:
     extends:
@@ -46,7 +48,9 @@ services:
     depends_on:
       - pg
       - mc
+{%- if cookiecutter.worker != 'none' %}
       - redis
+{%- endif %}
     command: [
       "pysu", "app",
       "django-admin",
