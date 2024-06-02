@@ -30,7 +30,6 @@ select = [
     "PLE", # pylint errors
     "PT", # flake8-pytest-style
     "PTH", # flake8-use-pathlib
-    "Q", # flake8-quotes
     "RSE", # flake8-raise
     "RUF", # ruff-specific rules
     "S", # flake8-bandit
@@ -41,19 +40,10 @@ select = [
 [tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 mark-parentheses = false
-{%- if cookiecutter.formatter_quote_style == "single" %}
-
-[tool.ruff.lint.flake8-quotes]
-inline-quotes = "single"
-{%- endif %}
 
 [tool.ruff.lint.isort]
 forced-separate = ["conftest"]
 force-single-line = true
 
-[tool.black]
-line-length = 140
-target-version = ["py310"]
-{%- if cookiecutter.formatter_quote_style == "single" %}
-skip-string-normalization = true
-{%- endif %}
+[tool.ruff.format]
+quote-style = "{{ cookiecutter.formatter_quote_style }}"
