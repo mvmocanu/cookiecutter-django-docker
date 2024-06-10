@@ -19,10 +19,6 @@ repos:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix, --show-fixes{% if cookiecutter.ruff_unsafe_fixes %}, --unsafe-fixes{% endif %}]
       - id: ruff-format
-  - repo: https://github.com/psf/black
-    rev: main
-    hooks:
-      - id: black
   - repo: https://github.com/rtts/djhtml
     rev: main
     hooks:
