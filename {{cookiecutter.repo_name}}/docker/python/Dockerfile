@@ -11,7 +11,7 @@ RUN <<EOF bash
     curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
     apt-get update
     apt-get install -y --no-install-recommends \
-        python3-dev python3-distutils-extra \
+        python3-dev \
         python-is-python3 \
         libpq-dev={{ cookiecutter.__postgresql_version.split('.')|first }}.* libpq5={{ cookiecutter.__postgresql_version.split('.')|first }}.* \
         libgdal-dev \
@@ -22,7 +22,7 @@ RUN <<EOF bash
 EOF
 RUN <<EOF bash
     set -euxo pipefail
-    curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - --no-cache --disable-pip-version-check --upgrade \
+    curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - --no-cache --disable-pip-version-check --upgrade --break-system-packages \
     pip=={{ cookiecutter.__pip_version }} setuptools=={{ cookiecutter.__setuptools_version }}
 EOF
 
@@ -77,7 +77,7 @@ RUN <<EOF bash
         graphviz \
         dumb-init \
         libpq5={{ cookiecutter.__postgresql_version.split('.')|first }}.* postgresql-client-{{ cookiecutter.__postgresql_version.split('.')|first }} \
-        python3-dbg python3-distutils python3-distutils-extra \
+        python3-dbg \
         python3-gdal gdal-bin \
         python-is-python3 \
         libmemcached11 libpcre3 \
@@ -98,14 +98,32 @@ RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
  && dpkg-reconfigure -f noninteractive tzdata
 RUN <<EOF bash
     set -euxo pipefail
-    curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - --no-cache --disable-pip-version-check --upgrade \
-    pip=={{ cookiecutter.__pip_version }} setuptools=={{ cookiecutter.__setuptools_version }}
+    curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - --no-cache --disable-pip-version-check --upgrade --break-system-packages \
+{%- if cookiecutter.uv_enabled %}
+        uv=={{ cookiecutter.__uv_version }}
+{%- else %}
+        pip=={{ cookiecutter.__pip_version }} setuptools=={{ cookiecutter.__setuptools_version }}
+{%- endif %}
 EOF
 
 RUN --mount=type=bind,from=deps,src=/deps,target=/deps <<EOF bash
     set -eux
     if [[ -e /deps/wheels ]]; then
-        pip install --force-reinstall --ignore-installed --upgrade --no-index --no-deps /deps/wheels/*
+{%- if cookiecutter.uv_enabled %}
+        uv pip install \
+            --link-mode=copy \
+            --compile-bytecode \
+            --no-python-downloads \
+            --system \
+            --reinstall \
+            --no-build \
+            --upgrade --no-index --no-deps --break-system-packages /deps/wheels/*
+{%- else %}
+        pip install \
+            --force-reinstall \
+            --ignore-installed \
+            --upgrade --no-index --no-deps --break-system-packages /deps/wheels/*
+{%- endif %}
     else
         echo 'No wheels built!'
         exit 1
@@ -115,9 +133,14 @@ EOF
 # This is more geared to development (eg: match user's UID) than production (where you shouln't need any sudo/home).
 ARG USER_ID=1000
 ARG GROUP_ID=1000
-RUN groupadd --gid $GROUP_ID app || true \
- && useradd --uid $USER_ID --gid $GROUP_ID --shell /bin/bash --create-home app \
- && echo "app ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN <<EOF bash
+    set -eux
+    # clear leftover user that the 24.04 image has
+    userdel ubuntu || true
+    groupadd --gid $GROUP_ID app
+    useradd --uid $USER_ID --gid $GROUP_ID --shell /bin/bash --create-home app
+    echo "app ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+EOF
 
 ENV PYTHONUNBUFFERED=x
 ENV PYTHONFAULTHANDLER=x

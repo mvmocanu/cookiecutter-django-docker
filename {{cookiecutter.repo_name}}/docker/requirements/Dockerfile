@@ -13,7 +13,7 @@ RUN <<EOF bash
     curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
     apt-get update
     apt-get install -y --no-install-recommends \
-        python3-dev python3-distutils-extra \
+        python3-dev \
         python-is-python3 \
         libpq-dev={{ cookiecutter.__postgresql_version.split('.')|first }}.* libpq5={{ cookiecutter.__postgresql_version.split('.')|first }}.* \
         libgdal-dev \
@@ -25,7 +25,7 @@ EOF
 
 RUN <<EOF bash
     set -euxo pipefail
-    curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - --no-cache --disable-pip-version-check --upgrade \
+    curl -fsSL 'https://bootstrap.pypa.io/get-pip.py' | python - --no-cache --disable-pip-version-check --upgrade --break-system-packages \
 {%- if cookiecutter.uv_enabled %}
     uv=={{ cookiecutter.__uv_version }}
 {%- else %}
@@ -36,8 +36,14 @@ EOF
 ENV CPUCOUNT=1
 ARG USER_ID=1000
 ARG GROUP_ID=1000
-RUN groupadd --gid $GROUP_ID app \
- && useradd --uid $USER_ID --gid $GROUP_ID --shell /bin/bash --create-home /app
+RUN <<EOF bash
+    set -eux
+    # clear leftover user that the 24.04 image has
+    userdel ubuntu || true
+    groupadd --gid $GROUP_ID app
+    useradd --uid $USER_ID --gid $GROUP_ID --shell /bin/bash --create-home app
+    echo "app ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+EOF
 
 COPY entrypoint.sh /
 
