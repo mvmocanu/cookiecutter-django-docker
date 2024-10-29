@@ -44,26 +44,39 @@ export COMPOSE_FILE=docker-compose.test.yml
 
 USER="${USER:-$(id -nu)}"
 if [[ "$(uname)" == "Darwin" ]]; then
-    USER_UID=1000
-    USER_GID=1000
+    USER_ID=1000
+    GROUP_ID=1000
 else
-    USER_UID="$(id -u "$USER")"
-    USER_GID="$(id -g "$USER")"
+    USER_ID="$(id -u "$USER")"
+    GROUP_ID="$(id -g "$USER")"
 fi
+BUILD_ARGS="--build-arg USER_ID=$USER_ID --build-arg GROUP_ID=$GROUP_ID --build-arg BUILDKIT_INLINE_CACHE=1"
 
 if [[ -z "$(find requirements -maxdepth 1 -name '*.txt' -print -quit)" ]] || [[ "$*" == "requirements" ]]; then
     set -x
-    docker compose build --build-arg "USER_UID=$USER_UID" --build-arg "USER_GID=$USER_GID" requirements
-    docker compose run --rm --user=$USER_UID requirements
+    docker compose build $BUILD_ARGS requirements
+    docker compose run --rm --user=$USER_ID requirements
     if [[ "$*" == "requirements" ]]; then
         exit
     fi
     set +x
 fi
 
-if [[ -z "${NOBUILD:-}" ]]; then
-    docker compose build --build-arg "USER_UID=$USER_UID" --build-arg "USER_GID=$USER_GID" test
+if [[ "${1:-}" == "docker" ]]; then
+    set -x
+    exec "$@"
+elif [[ "${1:-}" == "build" ]]; then
+    shift
+    set -x
+    exec docker compose build $BUILD_ARGS "$@"
 fi
+
+if [[ -z "${NOBUILD:-}" ]]; then
+    docker compose build $BUILD_ARGS
+fi
+
+set -x
+
 if [[ -z "$*" ]]; then
     set -- pytest
 fi
@@ -75,15 +88,17 @@ if [[ ! -e $homedir ]]; then
 fi
 
 function cleanup() {
+    echo "Saving logs to docker-compose.log"
+    docker compose logs --no-color &> docker-compose.log
     echo "Cleaning up ..."
     docker compose down && docker compose rm -fv
 }
 if [[ -n "${NODEPS:-}" ]]; then
-    exec docker compose run -e NODEPS=yes --no-deps --rm --user=$USER_UID test "$@"
+    exec docker compose run -e NODEPS=yes --no-deps --rm --user=$USER_ID test "$@"
 else
     if [[ -z "${NOCLEAN:-}" ]]; then
         trap cleanup EXIT
         cleanup || echo "Already clean :-)"
     fi
-    docker compose run --rm --user=$USER_UID test "$@"
+    docker compose run --rm --user=$USER_ID test "$@"
 fi
