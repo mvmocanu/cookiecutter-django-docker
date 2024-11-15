@@ -89,7 +89,7 @@ EOF
 ARG TZ={{ cookiecutter.timezone }}
 
 # Force a sensible default encoding (affects terminal output and filename handling).
-# See: https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/uwsgi/
+# See: https://docs.djangoproject.com/en/stable/howto/deployment/wsgi/uwsgi/
 # Note that for en_US.UTF-8 you need to install and compile locales, seems overkill...
 ENV LANG=C.UTF-8
 

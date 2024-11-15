@@ -1,4 +1,6 @@
-# See: https://ssl-config.mozilla.org/
+# generated 2024-11-12, Mozilla Guideline v5.7, nginx 1.27.2, OpenSSL 3.0.13, modern configuration
+# https://ssl-config.mozilla.org/#server=nginx&version=1.27.2&config=modern&openssl=3.0.13&guideline=5.7
+
 server {
     access_log /shared/$SERVER_NAME/logs/access.log custom;
     error_log /shared/$SERVER_NAME/logs/error.log warn;
@@ -11,10 +13,8 @@ server {
     ssl_certificate /shared/$SERVER_NAME/etc/fullchain.pem;
     ssl_certificate_key /shared/$SERVER_NAME/etc/privkey.pem;
 
-    # https://ssl-config.mozilla.org/#server=nginx&config=modern
     ssl_session_timeout 1d;
     ssl_session_cache shared:MozSSL:10m;  # about 40000 sessions
-    ssl_session_tickets off;
 
     # modern configuration
     ssl_protocols TLSv1.3;
@@ -31,7 +31,7 @@ server {
     ssl_trusted_certificate /shared/$SERVER_NAME/etc/chain.pem;
 
     # replace with the IP address of your resolver
-    resolver 127.0.0.11;
+    resolver 127.0.0.11;  # hardcoded docker resolver, sorry
 
     location /.well-known/acme-challenge {
         root /shared/$SERVER_NAME;
